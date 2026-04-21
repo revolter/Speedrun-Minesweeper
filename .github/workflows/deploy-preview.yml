@@ -62,35 +62,15 @@ jobs:
           PREVIEW_URL: ${{ steps.preview_url.outputs.url }}
         with:
           script: |
-            const marker = '<!-- preview-url-comment -->';
             const body = [
-              marker,
               '🚀 Preview deployment is ready:',
               process.env.PREVIEW_URL
             ].join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;
-            const comments = await github.paginate(
-              github.rest.issues.listComments,
-              { owner, repo, issue_number, per_page: 100 }
-            );
-            const existing = comments.find(
-              (comment) =>
-                comment.user?.type === 'Bot' &&
-                comment.body?.includes(marker)
-            );
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner,
-                repo,
-                comment_id: existing.id,
-                body
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number,
-                body
-              });
-            }
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body
+            });
