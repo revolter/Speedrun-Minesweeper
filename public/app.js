@@ -7,7 +7,7 @@ const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.21.12';
+const APP_VERSION = '2026.04.21.13';
 
 const prefs = {
   hideFlagged: true,
@@ -137,7 +137,7 @@ function handleAction(row, col, actionType) {
 
   const after = captureCellState(row, col);
   if (hasCellStateChanged(before, after)) {
-    recordDebugAction(debugTrace, actionType, game, { hideFlagged: prefs.hideFlagged });
+    recordDebugAction(debugTrace, actionType, row, col, game, { hideFlagged: prefs.hideFlagged });
   }
 
   render();

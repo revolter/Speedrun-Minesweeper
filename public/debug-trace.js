@@ -21,7 +21,7 @@ function visibleSnapshot(game, hideFlagged) {
         continue;
       }
       if (!cell.isRevealed) {
-        text += '.';
+        text += '?';
         continue;
       }
       if (cell.isMine) {
@@ -59,11 +59,13 @@ export function createDebugTrace(game, options = {}) {
   };
 }
 
-export function recordDebugAction(trace, action, game, options = {}) {
+export function recordDebugAction(trace, action, row, col, game, options = {}) {
   const hideFlagged = options.hideFlagged ?? true;
   trace.actions.push({
     index: trace.actions.length + 1,
     action,
+    row,
+    col,
     snapshot: visibleSnapshot(game, hideFlagged)
   });
 }
@@ -87,6 +89,8 @@ export function isDebugTrace(value) {
       (action) =>
         Number.isInteger(action.index) &&
         typeof action.action === 'string' &&
+        Number.isInteger(action.row) &&
+        Number.isInteger(action.col) &&
         Array.isArray(action.snapshot) &&
         action.snapshot.every((row) => typeof row === 'string')
     )

@@ -13,14 +13,16 @@
     "000"
   ],
   "initialSnapshot": [
-    "..0",
-    "..0",
+    "??0",
+    "??0",
     "000"
   ],
   "actions": [
     {
       "index": 1,
       "action": "flag",
+      "row": 0,
+      "col": 0,
       "snapshot": [
         "F00",
         "000",
@@ -30,6 +32,8 @@
     {
       "index": 2,
       "action": "reveal",
+      "row": 1,
+      "col": 1,
       "snapshot": [
         "F00",
         "000",

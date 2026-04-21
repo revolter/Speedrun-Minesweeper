@@ -42,12 +42,14 @@ test('debug trace records chronological actions', () => {
   const game = createGame(3, 3, 1, cyclingRng(9));
   const trace = createDebugTrace(game);
 
-  recordDebugAction(trace, 'flag', game);
-  recordDebugAction(trace, 'reveal', game);
+  recordDebugAction(trace, 'flag', 0, 0, game);
+  recordDebugAction(trace, 'reveal', 1, 1, game);
 
   assert.equal(trace.actions.length, 2);
   assert.equal(trace.actions[0].index, 1);
   assert.equal(trace.actions[0].action, 'flag');
+  assert.equal(trace.actions[0].row, 0);
+  assert.equal(trace.actions[0].col, 0);
   assert.ok(Array.isArray(trace.actions[0].snapshot));
   assert.equal(JSON.parse(serializeDebugTrace(trace)).actions.length, 2);
 });

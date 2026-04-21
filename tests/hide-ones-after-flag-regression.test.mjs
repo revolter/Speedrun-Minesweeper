@@ -36,7 +36,7 @@ test('revealed 1-cells adjacent to a hidden flagged mine collapse to 0 in debug 
         if (r < 0 || c < 0 || r >= trace.rows || c >= trace.cols) {
           continue;
         }
-        if (trace.initialBoard[r][c] === '1' && snapshot[r][c] !== '.') {
+        if (trace.initialBoard[r][c] === '1' && snapshot[r][c] !== '?') {
           checked += 1;
           assert.equal(snapshot[r][c], '0');
         }
