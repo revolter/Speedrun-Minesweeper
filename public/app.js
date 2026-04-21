@@ -26,6 +26,7 @@ let game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
 let debugTrace = createDebugTrace(game);
 let pressTimer = null;
 let longPressTriggered = false;
+let copyButtonResetTimer = null;
 
 function loadPreferences() {
   try {
@@ -102,7 +103,7 @@ function statusLabel() {
   return 'Speedrun mode: flagging is permanent and auto-reveals nearby safe cells.';
 }
 
-function actionState(row, col) {
+function captureActionState(row, col) {
   const cell = game.board[row]?.[col];
   if (!cell) {
     return null;
@@ -132,7 +133,7 @@ function hasActionStateChange(before, after) {
 }
 
 function handleAction(row, col, actionType) {
-  const before = actionState(row, col);
+  const before = captureActionState(row, col);
 
   if (actionType === 'reveal') {
     revealCell(game, row, col);
@@ -140,7 +141,7 @@ function handleAction(row, col, actionType) {
     flagCell(game, row, col, { hideFlagged: prefs.hideFlagged });
   }
 
-  const after = actionState(row, col);
+  const after = captureActionState(row, col);
   if (hasActionStateChange(before, after)) {
     recordDebugAction(debugTrace, actionType, row, col);
   }
@@ -261,8 +262,12 @@ async function copyDebugTrace() {
   } catch {
     els.copyDebug.textContent = 'Copy failed';
   }
-  setTimeout(() => {
+  if (copyButtonResetTimer) {
+    clearTimeout(copyButtonResetTimer);
+  }
+  copyButtonResetTimer = setTimeout(() => {
     els.copyDebug.textContent = 'Copy debug trace';
+    copyButtonResetTimer = null;
   }, 1200);
 }
 
