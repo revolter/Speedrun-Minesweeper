@@ -4,6 +4,7 @@ const BOARD_ROWS = 9;
 const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
+const APP_VERSION = '2026.04.21.1';
 
 const prefs = {
   hideFlagged: true,
@@ -15,7 +16,8 @@ const els = {
   status: document.querySelector('#status'),
   hideFlagged: document.querySelector('#hideFlagged'),
   swapPressActions: document.querySelector('#swapPressActions'),
-  newGame: document.querySelector('#newGame')
+  newGame: document.querySelector('#newGame'),
+  version: document.querySelector('#version')
 };
 
 let game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
@@ -202,6 +204,7 @@ function render() {
   }
 
   els.status.textContent = statusLabel();
+  els.version.textContent = `build ${APP_VERSION}`;
 }
 
 function resetGame() {
