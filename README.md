@@ -31,5 +31,7 @@ npm test
 
 ## Deployment
 
+- Enable **Settings → Pages → Build and deployment → Source: GitHub Actions** before running deployments.
 - Push to `main` triggers production deployment to GitHub Pages.
 - Opening/updating a PR triggers a GitHub Pages preview deployment.
+- If environment protection rules are enabled for `github-pages`, keep them compatible with your production deploy branch (typically `main`); the preview workflow is configured without that environment binding to avoid `refs/pull/*` protection failures.
