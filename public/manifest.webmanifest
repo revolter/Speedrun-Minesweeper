@@ -1,0 +1,16 @@
+{
+  "name": "Speedrun Minesweeper",
+  "short_name": "Minesweeper",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
