@@ -133,3 +133,15 @@ test('game is won when all mines are flagged and all safe cells are revealed', (
   flagCell(game, 0, 0);
   assert.equal(game.won, true);
 });
+
+test('flagging triggers local numbered-cell deduction reveals', () => {
+  const game = createManualGame(4, 4, [
+    [1, 0],
+    [0, 3]
+  ]);
+  game.board[1][1].isRevealed = true;
+
+  flagCell(game, 1, 0);
+
+  assert.equal(game.board[2][2].isRevealed, true);
+});

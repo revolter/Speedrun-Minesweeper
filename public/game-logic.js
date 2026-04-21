@@ -163,6 +163,27 @@ function revealFlood(game, row, col) {
   }
 }
 
+function flaggedNeighborCount(game, row, col) {
+  return getNeighbors(game.rows, game.cols, row, col).filter(([nr, nc]) => game.board[nr][nc].isFlagged).length;
+}
+
+function revealDeducedSafeNeighbors(game, row, col) {
+  const cell = game.board[row][col];
+  if (!cell.isRevealed || cell.isMine || cell.adjacent <= 0) {
+    return;
+  }
+  if (flaggedNeighborCount(game, row, col) !== cell.adjacent) {
+    return;
+  }
+
+  getNeighbors(game.rows, game.cols, row, col).forEach(([nr, nc]) => {
+    const neighbor = game.board[nr][nc];
+    if (!neighbor.isRevealed && !neighbor.isFlagged) {
+      revealFlood(game, nr, nc);
+    }
+  });
+}
+
 function updateWinState(game) {
   const won = game.board.every((row) =>
     row.every((cell) => (cell.isMine ? cell.isFlagged : cell.isRevealed))
@@ -203,6 +224,11 @@ export function flagCell(game, row, col, options = {}) {
     return;
   }
 
+  const deducedRevealCandidates = getNeighbors(game.rows, game.cols, row, col).filter(([nr, nc]) => {
+    const neighbor = game.board[nr][nc];
+    return neighbor.isRevealed && !neighbor.isMine;
+  });
+
   cell.isFlagged = true;
   if (options.hideFlagged) {
     cell.isHidden = true;
@@ -218,6 +244,10 @@ export function flagCell(game, row, col, options = {}) {
     if (!neighbor.isMine && !neighbor.isRevealed && !neighbor.isFlagged) {
       neighbor.isRevealed = true;
     }
+  });
+
+  deducedRevealCandidates.forEach(([nr, nc]) => {
+    revealDeducedSafeNeighbors(game, nr, nc);
   });
 
   updateWinState(game);
