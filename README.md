@@ -35,4 +35,5 @@ npm test
 - Create a dedicated repository environment named **`preview`** with no branch restriction (Settings → Environments) for PR preview deployments.
 - Push to `main` triggers production deployment to GitHub Pages.
 - Opening/updating a PR triggers a GitHub Pages preview deployment.
+- The preview workflow posts/updates a PR comment with the exact deployed preview URL for one-click access.
 - Keep `github-pages` environment protection rules compatible with your production deploy branch (typically `main`); PR previews deploy through the separate `preview` environment.
