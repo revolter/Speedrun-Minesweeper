@@ -19,10 +19,10 @@ jobs:
       name: preview
       url: ${{ steps.preview_url.outputs.url }}
     steps:
-      - name: Checkout production content (main)
+      - name: Checkout production content (PR base branch)
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event.pull_request.base.ref }}
           path: main
       - name: Checkout preview content (PR head)
         uses: actions/checkout@v4
