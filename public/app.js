@@ -102,16 +102,37 @@ function statusLabel() {
   return 'Speedrun mode: flagging is permanent and auto-reveals nearby safe cells.';
 }
 
+function actionState(row, col) {
+  const cell = game.board[row]?.[col];
+  if (!cell) {
+    return null;
+  }
+
+  return {
+    isRevealed: cell.isRevealed,
+    isFlagged: cell.isFlagged,
+    isHidden: cell.isHidden,
+    gameOver: game.gameOver,
+    won: game.won
+  };
+}
+
+function hasActionStateChange(before, after) {
+  if (!before || !after) {
+    return before !== after;
+  }
+
+  return (
+    before.isRevealed !== after.isRevealed ||
+    before.isFlagged !== after.isFlagged ||
+    before.isHidden !== after.isHidden ||
+    before.gameOver !== after.gameOver ||
+    before.won !== after.won
+  );
+}
+
 function handleAction(row, col, actionType) {
-  const before = game.board[row]?.[col]
-    ? {
-        isRevealed: game.board[row][col].isRevealed,
-        isFlagged: game.board[row][col].isFlagged,
-        isHidden: game.board[row][col].isHidden,
-        gameOver: game.gameOver,
-        won: game.won
-      }
-    : null;
+  const before = actionState(row, col);
 
   if (actionType === 'reveal') {
     revealCell(game, row, col);
@@ -119,16 +140,8 @@ function handleAction(row, col, actionType) {
     flagCell(game, row, col, { hideFlagged: prefs.hideFlagged });
   }
 
-  const after = game.board[row]?.[col]
-    ? {
-        isRevealed: game.board[row][col].isRevealed,
-        isFlagged: game.board[row][col].isFlagged,
-        isHidden: game.board[row][col].isHidden,
-        gameOver: game.gameOver,
-        won: game.won
-      }
-    : null;
-  if (JSON.stringify(before) !== JSON.stringify(after)) {
+  const after = actionState(row, col);
+  if (hasActionStateChange(before, after)) {
     recordDebugAction(debugTrace, actionType, row, col);
   }
 
