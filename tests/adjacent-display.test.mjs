@@ -17,6 +17,11 @@ test('returns original adjacent value when hide flagged preference is off', () =
   assert.equal(value, 2);
 });
 
+test('does not subtract flagged neighbors when hide preference is off', () => {
+  const value = displayedAdjacentValue(cell(3), [cell(0, { isFlagged: true, isHidden: false })], false);
+  assert.equal(value, 3);
+});
+
 test('subtracts flagged neighbors from revealed number cells when hide preference is on', () => {
   const value = displayedAdjacentValue(cell(3), [
     cell(0, { isFlagged: true, isHidden: true }),
