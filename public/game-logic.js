@@ -314,11 +314,8 @@ function revealGuaranteedSafeCellsPass(game) {
     const [row, col] = frontier[varIndex].split(',').map(Number);
     const cell = game.board[row][col];
     if (!cell.isRevealed && !cell.isFlagged) {
-      const before = cell.isRevealed;
       revealFlood(game, row, col);
-      if (!before) {
-        changed = true;
-      }
+      changed = true;
     }
   });
 
@@ -380,8 +377,8 @@ export function flagCell(game, row, col, options = {}) {
     cell.isHidden = true;
   }
   if (!cell.isMine) {
-    cell.isHidden = false;
     game.gameOver = true;
+    game.won = false;
     return;
   }
 

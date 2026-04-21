@@ -38,7 +38,7 @@ self.addEventListener('fetch', (event) => {
         if (cached) {
           return cached;
         }
-        throw new Error('Network unavailable and no cached response.');
+        throw new Error('Network unavailable and resource not cached.');
       }
     })()
   );
