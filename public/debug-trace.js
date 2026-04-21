@@ -2,8 +2,12 @@ import { displayedAdjacentValue } from './adjacent-display.js';
 
 export const DEBUG_TRACE_FORMAT = 'speedrun-minesweeper-debug-v2';
 
+function boardCellChar(cell) {
+  return cell.isMine ? 'M' : String(cell.adjacent);
+}
+
 function boardSnapshot(game) {
-  return game.board.map((row) => row.map((cell) => (cell.isMine ? 'M' : String(cell.adjacent))).join(''));
+  return game.board.map((row) => row.map(boardCellChar).join(''));
 }
 
 function visibleSnapshot(game, hideFlagged) {
