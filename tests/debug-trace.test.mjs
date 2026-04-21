@@ -18,10 +18,10 @@ function fixture(name) {
 }
 
 function cyclingRng(size) {
-  let i = 0;
+  let index = 0;
   return () => {
-    const value = (i % size) / size;
-    i += 1;
+    const value = (index % size) / size;
+    index += 1;
     return value;
   };
 }

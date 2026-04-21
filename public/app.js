@@ -103,12 +103,35 @@ function statusLabel() {
 }
 
 function handleAction(row, col, actionType) {
-  recordDebugAction(debugTrace, actionType, row, col);
+  const before = game.board[row]?.[col]
+    ? {
+        isRevealed: game.board[row][col].isRevealed,
+        isFlagged: game.board[row][col].isFlagged,
+        isHidden: game.board[row][col].isHidden,
+        gameOver: game.gameOver,
+        won: game.won
+      }
+    : null;
+
   if (actionType === 'reveal') {
     revealCell(game, row, col);
   } else {
     flagCell(game, row, col, { hideFlagged: prefs.hideFlagged });
   }
+
+  const after = game.board[row]?.[col]
+    ? {
+        isRevealed: game.board[row][col].isRevealed,
+        isFlagged: game.board[row][col].isFlagged,
+        isHidden: game.board[row][col].isHidden,
+        gameOver: game.gameOver,
+        won: game.won
+      }
+    : null;
+  if (JSON.stringify(before) !== JSON.stringify(after)) {
+    recordDebugAction(debugTrace, actionType, row, col);
+  }
+
   render();
 }
 
