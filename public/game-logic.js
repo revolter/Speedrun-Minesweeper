@@ -1,3 +1,6 @@
+const MAX_INITIAL_REVEAL_ATTEMPTS = 200;
+const MIN_SAFE_REGION_SIZE = 2;
+
 export function createGame(rows = 9, cols = 9, mineCount = 10, rng = Math.random) {
   const total = rows * cols;
   const mines = Math.max(1, Math.min(mineCount, total - 1));
@@ -5,7 +8,7 @@ export function createGame(rows = 9, cols = 9, mineCount = 10, rng = Math.random
   let revealed = false;
   let attempts = 0;
 
-  while (!revealed && attempts < 200) {
+  while (!revealed && attempts < MAX_INITIAL_REVEAL_ATTEMPTS) {
     game = buildGame(rows, cols, mines, rng);
     revealed = revealInitialArea(game);
     attempts += 1;
@@ -96,7 +99,7 @@ function revealInitialArea(game) {
   for (let r = 0; r < game.rows; r += 1) {
     for (let c = 0; c < game.cols; c += 1) {
       const cell = game.board[r][c];
-      if (!cell.isMine && cell.adjacent === 0 && zeroRegionSize(game, r, c) > 1) {
+      if (!cell.isMine && cell.adjacent === 0 && zeroRegionSize(game, r, c) >= MIN_SAFE_REGION_SIZE) {
         revealFlood(game, r, c);
         return true;
       }
