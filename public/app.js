@@ -1,12 +1,13 @@
 import { createGame, revealCell, flagCell } from './game-logic.js';
 import { createDebugTrace, recordDebugAction, serializeDebugTrace } from './debug-trace.js';
+import { displayedAdjacentValue } from './adjacent-display.js';
 
 const BOARD_ROWS = 9;
 const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.21.6';
+const APP_VERSION = '2026.04.21.7';
 
 const prefs = {
   hideFlagged: true,
@@ -49,30 +50,17 @@ function savePreferences() {
 }
 
 function displayedAdjacent(row, col, cell) {
-  if (!prefs.hideFlagged || !cell.isRevealed || cell.isMine) {
-    return cell.adjacent;
-  }
-
-  let adjusted = cell.adjacent;
   const neighbors = [
-    [row - 1, col - 1],
-    [row - 1, col],
-    [row - 1, col + 1],
-    [row, col - 1],
-    [row, col + 1],
-    [row + 1, col - 1],
-    [row + 1, col],
-    [row + 1, col + 1]
+    game.board[row - 1]?.[col - 1],
+    game.board[row - 1]?.[col],
+    game.board[row - 1]?.[col + 1],
+    game.board[row]?.[col - 1],
+    game.board[row]?.[col + 1],
+    game.board[row + 1]?.[col - 1],
+    game.board[row + 1]?.[col],
+    game.board[row + 1]?.[col + 1]
   ];
-
-  neighbors.forEach(([nr, nc]) => {
-    const neighbor = game.board[nr]?.[nc];
-    if (neighbor?.isFlagged && neighbor.isHidden) {
-      adjusted -= 1;
-    }
-  });
-
-  return Math.max(0, adjusted);
+  return displayedAdjacentValue(cell, neighbors, prefs.hideFlagged);
 }
 
 function cellLabel(row, col, cell) {
