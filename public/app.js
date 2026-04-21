@@ -7,7 +7,7 @@ const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.21.9';
+const APP_VERSION = '2026.04.21.10';
 
 const prefs = {
   hideFlagged: true,

@@ -31,7 +31,7 @@ test('subtracts flagged neighbors from revealed number cells when hide preferenc
   assert.equal(value, 1);
 });
 
-test('keeps at least 1 for originally non-zero number cells', () => {
+test('shows 0 when flagged neighbors satisfy a revealed number cell', () => {
   const value = displayedAdjacentValue(cell(1), [cell(0, { isFlagged: true, isHidden: true })], true);
-  assert.equal(value, 1);
+  assert.equal(value, 0);
 });
