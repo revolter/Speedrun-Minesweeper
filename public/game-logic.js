@@ -59,6 +59,7 @@ function buildGame(rows, cols, mines, rng) {
     rows,
     cols,
     mineCount: mines,
+    initialRevealCell: null,
     board,
     gameOver: false,
     won: false
@@ -100,6 +101,7 @@ function revealInitialArea(game) {
     for (let c = 0; c < game.cols; c += 1) {
       const cell = game.board[r][c];
       if (!cell.isMine && cell.adjacent === 0 && zeroRegionSize(game, r, c) >= MIN_SAFE_REGION_SIZE) {
+        game.initialRevealCell = { row: r, col: c };
         revealFlood(game, r, c);
         return true;
       }
@@ -112,6 +114,7 @@ function revealAnySafeCell(game) {
   for (let r = 0; r < game.rows; r += 1) {
     for (let c = 0; c < game.cols; c += 1) {
       if (!game.board[r][c].isMine) {
+        game.initialRevealCell = { row: r, col: c };
         revealFlood(game, r, c);
         return;
       }

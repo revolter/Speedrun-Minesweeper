@@ -1,4 +1,5 @@
 import { createGame, revealCell, flagCell } from './game-logic.js';
+import { createDebugTrace, recordDebugAction, serializeDebugTrace } from './debug-trace.js';
 
 const BOARD_ROWS = 9;
 const BOARD_COLS = 9;
@@ -17,10 +18,12 @@ const els = {
   hideFlagged: document.querySelector('#hideFlagged'),
   swapPressActions: document.querySelector('#swapPressActions'),
   newGame: document.querySelector('#newGame'),
+  copyDebug: document.querySelector('#copyDebug'),
   version: document.querySelector('#version')
 };
 
 let game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
+let debugTrace = createDebugTrace(game);
 let pressTimer = null;
 let longPressTriggered = false;
 
@@ -100,6 +103,7 @@ function statusLabel() {
 }
 
 function handleAction(row, col, actionType) {
+  recordDebugAction(debugTrace, actionType, row, col);
   if (actionType === 'reveal') {
     revealCell(game, row, col);
   } else {
@@ -209,7 +213,21 @@ function render() {
 
 function resetGame() {
   game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
+  debugTrace = createDebugTrace(game);
   render();
+}
+
+async function copyDebugTrace() {
+  const payload = serializeDebugTrace(debugTrace);
+  try {
+    await navigator.clipboard.writeText(payload);
+    els.copyDebug.textContent = 'Copied!';
+  } catch {
+    els.copyDebug.textContent = 'Copy failed';
+  }
+  setTimeout(() => {
+    els.copyDebug.textContent = 'Copy debug trace';
+  }, 1200);
 }
 
 function registerServiceWorker() {
@@ -231,6 +249,7 @@ els.swapPressActions.addEventListener('change', () => {
 });
 
 els.newGame.addEventListener('click', resetGame);
+els.copyDebug.addEventListener('click', copyDebugTrace);
 
 loadPreferences();
 render();

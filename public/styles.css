@@ -61,6 +61,15 @@ input {
   font-weight: 600;
 }
 
+#copyDebug {
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  color: #475569;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+}
+
 label {
   display: inline-flex;
   align-items: center;

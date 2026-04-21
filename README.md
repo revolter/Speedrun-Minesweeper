@@ -15,6 +15,12 @@ A touch-friendly PWA minesweeper variant designed for mobile browsers (including
 - **Hide flagged cells** (enabled by default): renders flagged cells like empty number-less cells after auto-reveal, and adjusts nearby displayed numbers accordingly.
 - **Swap short/long press** (enabled by default): switches short press and long press actions between reveal and flag.
 
+## Debug trace export
+
+- **Copy debug trace** exports a reproducible JSON trace to your clipboard.
+- The trace includes the initial board state, initial reveal cell, initially revealed cells, and all user `flag`/`reveal` actions in chronological order.
+- Concrete fixture examples are available under `tests/fixtures/`.
+
 ## Local run
 
 Serve the `public` directory with any static server:

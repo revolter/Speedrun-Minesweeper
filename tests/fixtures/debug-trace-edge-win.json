@@ -1,0 +1,22 @@
+{
+  "format": "speedrun-minesweeper-debug-v1",
+  "rows": 2,
+  "cols": 2,
+  "mineCount": 1,
+  "initialRevealCell": {
+    "row": 1,
+    "col": 1
+  },
+  "initialBoard": [
+    ["M", 1],
+    [1, 1]
+  ],
+  "initialRevealedCells": [
+    [1, 1]
+  ],
+  "actions": [
+    { "index": 1, "action": "reveal", "row": 0, "col": 1 },
+    { "index": 2, "action": "reveal", "row": 1, "col": 0 },
+    { "index": 3, "action": "flag", "row": 0, "col": 0 }
+  ]
+}
