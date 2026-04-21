@@ -160,181 +160,9 @@ function revealFlood(game, row, col) {
   }
 }
 
-function revealGuaranteedSafeCellsPass(game) {
-  const frontierKeys = new Set();
-  const constraints = [];
-
-  for (let r = 0; r < game.rows; r += 1) {
-    for (let c = 0; c < game.cols; c += 1) {
-      const cell = game.board[r][c];
-      if (!cell.isRevealed || cell.isMine || cell.adjacent === 0) {
-        continue;
-      }
-
-      let flaggedCount = 0;
-      const unknownKeys = [];
-      getNeighbors(game.rows, game.cols, r, c).forEach(([nr, nc]) => {
-        const neighbor = game.board[nr][nc];
-        if (neighbor.isFlagged) {
-          flaggedCount += 1;
-        } else if (!neighbor.isRevealed) {
-          const key = `${nr},${nc}`;
-          unknownKeys.push(key);
-          frontierKeys.add(key);
-        }
-      });
-
-      const minesRequired = cell.adjacent - flaggedCount;
-      if (minesRequired < 0 || minesRequired > unknownKeys.length) {
-        return false;
-      }
-      if (unknownKeys.length > 0) {
-        constraints.push({ keys: unknownKeys, minesRequired });
-      }
-    }
-  }
-
-  if (frontierKeys.size === 0 || constraints.length === 0) {
-    return false;
-  }
-
-  const frontier = Array.from(frontierKeys);
-  const frontierIndex = new Map(frontier.map((key, index) => [key, index]));
-  const normalizedConstraints = constraints.map((constraint) => ({
-    vars: Array.from(new Set(constraint.keys.map((key) => frontierIndex.get(key)))),
-    minesRequired: constraint.minesRequired
-  }));
-
-  const varToConstraints = Array.from({ length: frontier.length }, () => []);
-  normalizedConstraints.forEach((constraint, constraintIndex) => {
-    constraint.vars.forEach((varIndex) => {
-      varToConstraints[varIndex].push(constraintIndex);
-    });
-  });
-
-  const visited = new Set();
-  const guaranteedSafeVars = new Set();
-
-  for (let startVar = 0; startVar < frontier.length; startVar += 1) {
-    if (visited.has(startVar)) {
-      continue;
-    }
-
-    const stack = [startVar];
-    const componentVars = [];
-    const componentConstraints = new Set();
-
-    while (stack.length > 0) {
-      const varIndex = stack.pop();
-      if (visited.has(varIndex)) {
-        continue;
-      }
-      visited.add(varIndex);
-      componentVars.push(varIndex);
-
-      varToConstraints[varIndex].forEach((constraintIndex) => {
-        componentConstraints.add(constraintIndex);
-        normalizedConstraints[constraintIndex].vars.forEach((nextVar) => {
-          if (!visited.has(nextVar)) {
-            stack.push(nextVar);
-          }
-        });
-      });
-    }
-
-    const vars = componentVars;
-    const constraintsForComponent = Array.from(componentConstraints).map(
-      (constraintIndex) => normalizedConstraints[constraintIndex]
-    );
-    const assignment = new Map();
-    const mineCounts = new Map(vars.map((varIndex) => [varIndex, 0]));
-    let solutions = 0;
-
-    function isFeasible() {
-      for (const constraint of constraintsForComponent) {
-        let assignedMines = 0;
-        let unknown = 0;
-        for (const varIndex of constraint.vars) {
-          const value = assignment.get(varIndex);
-          if (value === undefined) {
-            unknown += 1;
-          } else if (value) {
-            assignedMines += 1;
-          }
-        }
-        if (assignedMines > constraint.minesRequired) {
-          return false;
-        }
-        if (assignedMines + unknown < constraint.minesRequired) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    function backtrack(position) {
-      if (position === vars.length) {
-        solutions += 1;
-        vars.forEach((varIndex) => {
-          if (assignment.get(varIndex)) {
-            mineCounts.set(varIndex, mineCounts.get(varIndex) + 1);
-          }
-        });
-        return;
-      }
-
-      const varIndex = vars[position];
-      assignment.set(varIndex, false);
-      if (isFeasible()) {
-        backtrack(position + 1);
-      }
-
-      assignment.set(varIndex, true);
-      if (isFeasible()) {
-        backtrack(position + 1);
-      }
-
-      assignment.delete(varIndex);
-    }
-
-    backtrack(0);
-    if (solutions === 0) {
-      return false;
-    }
-
-    vars.forEach((varIndex) => {
-      if (mineCounts.get(varIndex) === 0) {
-        guaranteedSafeVars.add(varIndex);
-      }
-    });
-  }
-
-  let changed = false;
-  guaranteedSafeVars.forEach((varIndex) => {
-    const [row, col] = frontier[varIndex].split(',').map(Number);
-    const cell = game.board[row][col];
-    if (!cell.isRevealed && !cell.isFlagged) {
-      revealFlood(game, row, col);
-      changed = true;
-    }
-  });
-
-  return changed;
-}
-
-function revealGuaranteedSafeCells(game) {
-  let changed = false;
-  let passChanged = true;
-  while (passChanged && !game.gameOver) {
-    passChanged = revealGuaranteedSafeCellsPass(game);
-    changed = changed || passChanged;
-  }
-  return changed;
-}
-
 function updateWinState(game) {
   const won = game.board.every((row) =>
-    row.every((cell) => cell.isMine || cell.isRevealed)
+    row.every((cell) => (cell.isMine ? cell.isFlagged : cell.isRevealed))
   );
   game.won = won;
   if (won) {
@@ -384,11 +212,10 @@ export function flagCell(game, row, col, options = {}) {
 
   getNeighbors(game.rows, game.cols, row, col).forEach(([nr, nc]) => {
     const neighbor = game.board[nr][nc];
-    if (!neighbor.isMine) {
-      revealFlood(game, nr, nc);
+    if (!neighbor.isMine && !neighbor.isRevealed && !neighbor.isFlagged) {
+      neighbor.isRevealed = true;
     }
   });
-  revealGuaranteedSafeCells(game);
 
   updateWinState(game);
 }

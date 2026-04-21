@@ -110,11 +110,26 @@ test('flagging an incorrect cell immediately loses the game', () => {
   assert.equal(game.won, false);
 });
 
-test('flagging reveals all currently deducible safe cells', () => {
+test('flagging only reveals safe cells adjacent to the newly flagged mine', () => {
   const game = createManualGame(3, 3, [[0, 0]]);
 
   flagCell(game, 0, 0);
 
+  assert.equal(game.board[0][1].isRevealed, true);
+  assert.equal(game.board[1][0].isRevealed, true);
+  assert.equal(game.board[1][1].isRevealed, true);
+  assert.equal(game.board[2][2].isRevealed, false);
+  assert.equal(game.won, false);
+});
+
+test('game is won when all mines are flagged and all safe cells are revealed', () => {
+  const game = createManualGame(2, 2, [[0, 0]]);
+
+  revealCell(game, 0, 1);
+  revealCell(game, 1, 0);
+  revealCell(game, 1, 1);
+  assert.equal(game.won, false);
+
+  flagCell(game, 0, 0);
   assert.equal(game.won, true);
-  assert.equal(game.board[2][2].isRevealed, true);
 });
