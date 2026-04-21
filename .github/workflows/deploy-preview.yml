@@ -27,7 +27,11 @@ jobs:
       - name: Initialize site with production content
         run: |
           mkdir -p site
-          cp -R main/public/. site/
+          if [ -d main/public ]; then
+            cp -R main/public/. site/
+          else
+            echo "No main/public directory on base branch; continuing with preview-only content."
+          fi
       - name: Checkout preview content (PR head)
         uses: actions/checkout@v4
         with:
@@ -35,6 +39,10 @@ jobs:
           path: preview
       - name: Build combined Pages artifact (prod + preview path)
         run: |
+          if [ ! -d preview/public ]; then
+            echo "preview/public directory is required for preview deployment."
+            exit 1
+          fi
           mkdir -p site/preview/pr-${{ github.event.pull_request.number }}
           cp -R preview/public/. site/preview/pr-${{ github.event.pull_request.number }}/
       - uses: actions/configure-pages@v5
