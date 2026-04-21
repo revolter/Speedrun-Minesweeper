@@ -104,7 +104,7 @@ function statusLabel() {
   return 'Speedrun mode: flagging is permanent and auto-reveals nearby safe cells.';
 }
 
-function captureActionState(row, col) {
+function captureCellState(row, col) {
   const cell = game.board[row]?.[col];
   if (!cell) {
     return null;
@@ -119,7 +119,7 @@ function captureActionState(row, col) {
   };
 }
 
-function hasActionStateChange(before, after) {
+function hasCellStateChanged(before, after) {
   if (!before || !after) {
     return before !== after;
   }
@@ -134,7 +134,7 @@ function hasActionStateChange(before, after) {
 }
 
 function handleAction(row, col, actionType) {
-  const before = captureActionState(row, col);
+  const before = captureCellState(row, col);
 
   if (actionType === 'reveal') {
     revealCell(game, row, col);
@@ -142,8 +142,8 @@ function handleAction(row, col, actionType) {
     flagCell(game, row, col, { hideFlagged: prefs.hideFlagged });
   }
 
-  const after = captureActionState(row, col);
-  if (hasActionStateChange(before, after)) {
+  const after = captureCellState(row, col);
+  if (hasCellStateChanged(before, after)) {
     recordDebugAction(debugTrace, actionType, row, col);
   }
 
