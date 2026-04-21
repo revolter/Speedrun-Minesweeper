@@ -37,7 +37,8 @@ jobs:
             const marker = '<!-- preview-url-comment -->';
             const body = [
               marker,
-              `🚀 Preview deployment is ready: [Open preview](${process.env.PREVIEW_URL})`
+              '🚀 Preview deployment is ready:',
+              process.env.PREVIEW_URL
             ].join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;

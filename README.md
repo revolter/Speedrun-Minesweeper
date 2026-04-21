@@ -6,10 +6,11 @@ A touch-friendly PWA minesweeper variant designed for mobile browsers (including
 
 - Flagging a cell is **permanent**.
 - When a cell is flagged, nearby safe cells are automatically revealed.
+- Each new game auto-expands a safe empty area at startup.
 
 ## Preferences
 
-- **Fade flagged cells**: fades flagged cells all the way to hidden (opacity `0`) after auto-reveal.
+- **Hide flagged cells**: hides flagged cells with an animation to opacity `0` after auto-reveal.
 - **Swap short/long press**: switches short press and long press actions between reveal and flag.
 
 ## Local run

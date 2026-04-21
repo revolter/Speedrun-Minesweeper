@@ -33,12 +33,24 @@ test('flagging auto-reveals nearby safe cells', () => {
   assert.equal(game.board[1][1].isRevealed, true);
 });
 
-test('fade preference applies when flagging', () => {
+test('new game starts with an auto-expanded safe area', () => {
+  let i = 0;
+  const game = createGame(9, 9, 10, () => {
+    const value = (i % 81) / 81;
+    i += 1;
+    return value;
+  });
+  const revealed = game.board.flat().filter((cell) => cell.isRevealed);
+  assert.ok(revealed.length > 1);
+  assert.equal(revealed.some((cell) => cell.isMine), false);
+});
+
+test('hide preference applies when flagging', () => {
   const game = createDeterministicGame();
 
-  flagCell(game, 2, 2, { fadeFlagged: true });
+  flagCell(game, 2, 2, { hideFlagged: true });
   assert.equal(game.board[2][2].isFlagged, true);
-  assert.equal(game.board[2][2].isFaded, true);
+  assert.equal(game.board[2][2].isHidden, true);
 
   revealCell(game, 2, 2);
   assert.equal(game.board[2][2].isRevealed, false);

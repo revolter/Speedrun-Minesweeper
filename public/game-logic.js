@@ -1,12 +1,31 @@
 export function createGame(rows = 9, cols = 9, mineCount = 10, rng = Math.random) {
   const total = rows * cols;
   const mines = Math.max(1, Math.min(mineCount, total - 1));
+  let game = null;
+  let revealed = false;
+  let attempts = 0;
+
+  while (!revealed && attempts < 200) {
+    game = buildGame(rows, cols, mines, rng);
+    revealed = revealInitialArea(game);
+    attempts += 1;
+  }
+
+  if (!revealed) {
+    revealAnySafeCell(game);
+  }
+
+  return game;
+}
+
+function buildGame(rows, cols, mines, rng) {
+  const total = rows * cols;
   const board = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
       isMine: false,
       isRevealed: false,
       isFlagged: false,
-      isFaded: false,
+      isHidden: false,
       adjacent: 0
     }))
   );
@@ -41,6 +60,60 @@ export function createGame(rows = 9, cols = 9, mineCount = 10, rng = Math.random
     gameOver: false,
     won: false
   };
+}
+
+function zeroRegionSize(game, row, col) {
+  const seen = new Set();
+  const queue = [[row, col]];
+  let size = 0;
+
+  while (queue.length > 0) {
+    const [r, c] = queue.shift();
+    const key = `${r},${c}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+
+    const cell = game.board[r][c];
+    if (cell.isMine || cell.adjacent !== 0) {
+      continue;
+    }
+
+    size += 1;
+    getNeighbors(game.rows, game.cols, r, c).forEach(([nr, nc]) => {
+      const neighbor = game.board[nr][nc];
+      if (!neighbor.isMine && neighbor.adjacent === 0) {
+        queue.push([nr, nc]);
+      }
+    });
+  }
+
+  return size;
+}
+
+function revealInitialArea(game) {
+  for (let r = 0; r < game.rows; r += 1) {
+    for (let c = 0; c < game.cols; c += 1) {
+      const cell = game.board[r][c];
+      if (!cell.isMine && cell.adjacent === 0 && zeroRegionSize(game, r, c) > 1) {
+        revealFlood(game, r, c);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function revealAnySafeCell(game) {
+  for (let r = 0; r < game.rows; r += 1) {
+    for (let c = 0; c < game.cols; c += 1) {
+      if (!game.board[r][c].isMine) {
+        revealFlood(game, r, c);
+        return;
+      }
+    }
+  }
 }
 
 function getNeighbors(rows, cols, row, col) {
@@ -125,8 +198,8 @@ export function flagCell(game, row, col, options = {}) {
   }
 
   cell.isFlagged = true;
-  if (options.fadeFlagged) {
-    cell.isFaded = true;
+  if (options.hideFlagged) {
+    cell.isHidden = true;
   }
 
   getNeighbors(game.rows, game.cols, row, col).forEach(([nr, nc]) => {

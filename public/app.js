@@ -6,14 +6,14 @@ const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 
 const prefs = {
-  fadeFlagged: false,
+  hideFlagged: false,
   swapPressActions: false
 };
 
 const els = {
   board: document.querySelector('#board'),
   status: document.querySelector('#status'),
-  fadeFlagged: document.querySelector('#fadeFlagged'),
+  hideFlagged: document.querySelector('#hideFlagged'),
   swapPressActions: document.querySelector('#swapPressActions'),
   newGame: document.querySelector('#newGame')
 };
@@ -25,14 +25,14 @@ let longPressTriggered = false;
 function loadPreferences() {
   try {
     const saved = JSON.parse(localStorage.getItem('speedrun-minesweeper-prefs') || '{}');
-    prefs.fadeFlagged = Boolean(saved.fadeFlagged);
+    prefs.hideFlagged = Boolean(saved.hideFlagged);
     prefs.swapPressActions = Boolean(saved.swapPressActions);
   } catch {
-    prefs.fadeFlagged = false;
+    prefs.hideFlagged = false;
     prefs.swapPressActions = false;
   }
 
-  els.fadeFlagged.checked = prefs.fadeFlagged;
+  els.hideFlagged.checked = prefs.hideFlagged;
   els.swapPressActions.checked = prefs.swapPressActions;
 }
 
@@ -69,7 +69,7 @@ function handleAction(row, col, actionType) {
   if (actionType === 'reveal') {
     revealCell(game, row, col);
   } else {
-    flagCell(game, row, col, { fadeFlagged: prefs.fadeFlagged });
+    flagCell(game, row, col, { hideFlagged: prefs.hideFlagged });
   }
   render();
 }
@@ -136,8 +136,8 @@ function render() {
       if (cell.isFlagged) {
         button.classList.add('flagged');
       }
-      if (cell.isFaded) {
-        button.classList.add('faded');
+      if (cell.isHidden) {
+        button.classList.add('hidden');
       }
 
       button.addEventListener('mousedown', (event) => {
@@ -185,8 +185,8 @@ function registerServiceWorker() {
   }
 }
 
-els.fadeFlagged.addEventListener('change', () => {
-  prefs.fadeFlagged = els.fadeFlagged.checked;
+els.hideFlagged.addEventListener('change', () => {
+  prefs.hideFlagged = els.hideFlagged.checked;
   savePreferences();
 });
 

@@ -103,11 +103,11 @@ label {
   background: #fde68a;
 }
 
-.cell.faded {
-  animation: fade-to-hidden 220ms ease-out forwards;
+.cell.hidden {
+  animation: hide-flagged-cell 220ms ease-out forwards;
 }
 
-@keyframes fade-to-hidden {
+@keyframes hide-flagged-cell {
   from {
     opacity: 1;
   }
