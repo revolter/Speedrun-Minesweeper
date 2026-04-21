@@ -10,7 +10,7 @@ A touch-friendly PWA minesweeper variant designed for mobile browsers (including
 
 ## Preferences
 
-- **Hide flagged cells**: hides flagged cells with an animation to opacity `0` after auto-reveal.
+- **Hide flagged cells**: renders flagged cells like empty number-less cells after auto-reveal.
 - **Swap short/long press**: switches short press and long press actions between reveal and flag.
 
 ## Local run

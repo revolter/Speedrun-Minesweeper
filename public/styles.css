@@ -104,15 +104,6 @@ label {
 }
 
 .cell.hidden {
-  animation: hide-flagged-cell 220ms ease-out forwards;
-}
-
-@keyframes hide-flagged-cell {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
+  background: #ffffff;
+  border-color: #d0d7ef;
 }

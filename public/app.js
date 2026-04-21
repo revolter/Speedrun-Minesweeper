@@ -42,6 +42,9 @@ function savePreferences() {
 
 function cellLabel(cell) {
   if (!cell.isRevealed) {
+    if (cell.isHidden) {
+      return '';
+    }
     if (cell.isFlagged) {
       return '🚩';
     }
@@ -133,7 +136,7 @@ function render() {
       if (cell.isMine && cell.isRevealed) {
         button.classList.add('mine');
       }
-      if (cell.isFlagged) {
+      if (cell.isFlagged && !cell.isHidden) {
         button.classList.add('flagged');
       }
       if (cell.isHidden) {
