@@ -1,40 +1,66 @@
-export const DEBUG_TRACE_FORMAT = 'speedrun-minesweeper-debug-v1';
+import { displayedAdjacentValue } from './adjacent-display.js';
 
-function initialBoard(game) {
-  return game.board.map((row) => row.map((cell) => (cell.isMine ? 'M' : cell.adjacent)));
+export const DEBUG_TRACE_FORMAT = 'speedrun-minesweeper-debug-v2';
+
+function boardSnapshot(game) {
+  return game.board.map((row) => row.map((cell) => (cell.isMine ? 'M' : String(cell.adjacent))).join(''));
 }
 
-function initialRevealedCells(game) {
-  const revealed = [];
+function visibleSnapshot(game, hideFlagged) {
+  const rows = [];
   for (let row = 0; row < game.rows; row += 1) {
+    let text = '';
     for (let col = 0; col < game.cols; col += 1) {
-      if (game.board[row][col].isRevealed) {
-        revealed.push([row, col]);
+      const cell = game.board[row][col];
+      if (cell.isFlagged) {
+        text += 'F';
+        continue;
       }
+      if (!cell.isRevealed) {
+        text += '.';
+        continue;
+      }
+      if (cell.isMine) {
+        text += 'M';
+        continue;
+      }
+      const neighbors = [
+        game.board[row - 1]?.[col - 1],
+        game.board[row - 1]?.[col],
+        game.board[row - 1]?.[col + 1],
+        game.board[row]?.[col - 1],
+        game.board[row]?.[col + 1],
+        game.board[row + 1]?.[col - 1],
+        game.board[row + 1]?.[col],
+        game.board[row + 1]?.[col + 1]
+      ];
+      text += String(displayedAdjacentValue(cell, neighbors, hideFlagged));
     }
+    rows.push(text);
   }
-  return revealed;
+  return rows;
 }
 
-export function createDebugTrace(game) {
+export function createDebugTrace(game, options = {}) {
+  const hideFlagged = options.hideFlagged ?? true;
   return {
     format: DEBUG_TRACE_FORMAT,
     rows: game.rows,
     cols: game.cols,
     mineCount: game.mineCount,
     initialRevealCell: game.initialRevealCell,
-    initialBoard: initialBoard(game),
-    initialRevealedCells: initialRevealedCells(game),
+    initialBoard: boardSnapshot(game),
+    initialSnapshot: visibleSnapshot(game, hideFlagged),
     actions: []
   };
 }
 
-export function recordDebugAction(trace, action, row, col) {
+export function recordDebugAction(trace, action, game, options = {}) {
+  const hideFlagged = options.hideFlagged ?? true;
   trace.actions.push({
     index: trace.actions.length + 1,
     action,
-    row,
-    col
+    snapshot: visibleSnapshot(game, hideFlagged)
   });
 }
 
@@ -49,7 +75,16 @@ export function isDebugTrace(value) {
     Number.isInteger(value.rows) &&
     Number.isInteger(value.cols) &&
     Array.isArray(value.initialBoard) &&
-    Array.isArray(value.initialRevealedCells) &&
-    Array.isArray(value.actions)
+    value.initialBoard.every((row) => typeof row === 'string') &&
+    Array.isArray(value.initialSnapshot) &&
+    value.initialSnapshot.every((row) => typeof row === 'string') &&
+    Array.isArray(value.actions) &&
+    value.actions.every(
+      (action) =>
+        Number.isInteger(action.index) &&
+        typeof action.action === 'string' &&
+        Array.isArray(action.snapshot) &&
+        action.snapshot.every((row) => typeof row === 'string')
+    )
   );
 }

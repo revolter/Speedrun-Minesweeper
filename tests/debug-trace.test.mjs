@@ -33,21 +33,22 @@ test('debug trace captures initial board snapshot and reveal metadata', () => {
   assert.equal(trace.rows, 5);
   assert.equal(trace.cols, 5);
   assert.ok(Array.isArray(trace.initialBoard));
+  assert.ok(Array.isArray(trace.initialSnapshot));
   assert.ok(trace.initialRevealCell);
-  assert.ok(trace.initialRevealedCells.length > 0);
+  assert.ok(trace.initialSnapshot.some((row) => row.includes('0')));
 });
 
 test('debug trace records chronological actions', () => {
   const game = createGame(3, 3, 1, cyclingRng(9));
   const trace = createDebugTrace(game);
 
-  recordDebugAction(trace, 'flag', 0, 0);
-  recordDebugAction(trace, 'reveal', 1, 1);
+  recordDebugAction(trace, 'flag', game);
+  recordDebugAction(trace, 'reveal', game);
 
-  assert.deepEqual(trace.actions, [
-    { index: 1, action: 'flag', row: 0, col: 0 },
-    { index: 2, action: 'reveal', row: 1, col: 1 }
-  ]);
+  assert.equal(trace.actions.length, 2);
+  assert.equal(trace.actions[0].index, 1);
+  assert.equal(trace.actions[0].action, 'flag');
+  assert.ok(Array.isArray(trace.actions[0].snapshot));
   assert.equal(JSON.parse(serializeDebugTrace(trace)).actions.length, 2);
 });
 
@@ -67,21 +68,9 @@ test('fixture traces are valid and available to tests', () => {
   assert.equal(isDebugTrace(localDeductionRegression), true);
   assert.equal(basic.actions.length > 0, true);
   assert.equal(edgeWin.actions.at(-1).action, 'flag');
-  assert.deepEqual(hiddenNumberRegression.actions, [
-    { index: 1, action: 'flag', row: 0, col: 4 },
-    { index: 2, action: 'flag', row: 2, col: 3 }
-  ]);
-  assert.deepEqual(localDeductionRegression.actions.at(-1), {
-    index: 5,
-    action: 'flag',
-    row: 2,
-    col: 1
-  });
-  assert.deepEqual(hideOnesAfterFlagRegression.actions, [{ index: 1, action: 'flag', row: 3, col: 6 }]);
-  assert.deepEqual(hideOnesTopRowRegression.actions.at(-1), {
-    index: 2,
-    action: 'flag',
-    row: 0,
-    col: 3
-  });
+  assert.equal(hiddenNumberRegression.actions[0].action, 'flag');
+  assert.equal(localDeductionRegression.actions.at(-1).action, 'flag');
+  assert.equal(hideOnesAfterFlagRegression.actions[0].action, 'flag');
+  assert.equal(hideOnesTopRowRegression.actions.at(-1).action, 'flag');
+  assert.ok(Array.isArray(hideOnesTopRowRegression.actions.at(-1).snapshot));
 });

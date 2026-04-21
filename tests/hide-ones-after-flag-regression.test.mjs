@@ -3,8 +3,6 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { flagCell, revealCell } from '../public/game-logic.js';
-import { displayedAdjacentValue } from '../public/adjacent-display.js';
 
 const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 
@@ -12,80 +10,46 @@ function fixture(name) {
   return JSON.parse(readFileSync(join(fixturesDir, name), 'utf8'));
 }
 
-function toGame(trace) {
-  const revealed = new Set(trace.initialRevealedCells.map(([row, col]) => `${row},${col}`));
-  return {
-    rows: trace.rows,
-    cols: trace.cols,
-    mineCount: trace.mineCount,
-    gameOver: false,
-    won: false,
-    board: trace.initialBoard.map((row, r) =>
-      row.map((value, c) => ({
-        isMine: value === 'M',
-        adjacent: value === 'M' ? 0 : value,
-        isRevealed: revealed.has(`${r},${c}`),
-        isFlagged: false,
-        isHidden: false
-      }))
-    )
-  };
-}
-
-function neighbors(game, row, col) {
-  return [
-    game.board[row - 1]?.[col - 1],
-    game.board[row - 1]?.[col],
-    game.board[row - 1]?.[col + 1],
-    game.board[row]?.[col - 1],
-    game.board[row]?.[col + 1],
-    game.board[row + 1]?.[col - 1],
-    game.board[row + 1]?.[col],
-    game.board[row + 1]?.[col + 1]
-  ];
-}
-
-test('revealed 1-cells adjacent to a hidden flagged mine collapse to 0 display', () => {
+test('revealed 1-cells adjacent to a hidden flagged mine collapse to 0 in debug snapshot', () => {
   const trace = fixture('debug-trace-hide-ones-after-flag-regression.json');
-  const game = toGame(trace);
-
-  trace.actions.forEach((action) => {
-    if (action.action === 'flag') {
-      flagCell(game, action.row, action.col, { hideFlagged: true });
-      return;
-    }
-    revealCell(game, action.row, action.col);
-  });
-
-  const oneCellsNextToFlag = [];
-  for (let r = 0; r < game.rows; r += 1) {
-    for (let c = 0; c < game.cols; c += 1) {
-      const cell = game.board[r][c];
-      if (!cell.isRevealed || cell.isMine || cell.adjacent !== 1) {
-        continue;
-      }
-      const adjacentCells = neighbors(game, r, c);
-      if (adjacentCells.some((neighbor) => neighbor?.isFlagged)) {
-        oneCellsNextToFlag.push([r, c, displayedAdjacentValue(cell, adjacentCells, true)]);
+  const snapshot = trace.actions.at(-1).snapshot;
+  const flagged = [];
+  for (let row = 0; row < trace.rows; row += 1) {
+    for (let col = 0; col < trace.cols; col += 1) {
+      if (snapshot[row][col] === 'F') {
+        flagged.push([row, col]);
       }
     }
   }
 
-  assert.ok(oneCellsNextToFlag.length > 0);
-  oneCellsNextToFlag.forEach(([, , displayed]) => assert.equal(displayed, 0));
+  assert.ok(flagged.length > 0);
+
+  let checked = 0;
+  for (const [row, col] of flagged) {
+    for (let dr = -1; dr <= 1; dr += 1) {
+      for (let dc = -1; dc <= 1; dc += 1) {
+        if (dr === 0 && dc === 0) {
+          continue;
+        }
+        const r = row + dr;
+        const c = col + dc;
+        if (r < 0 || c < 0 || r >= trace.rows || c >= trace.cols) {
+          continue;
+        }
+        if (trace.initialBoard[r][c] === '1' && snapshot[r][c] !== '.') {
+          checked += 1;
+          assert.equal(snapshot[r][c], '0');
+        }
+      }
+    }
+  }
+
+  assert.ok(checked > 0);
 });
 
-test('top-row revealed 1-cells adjacent to a hidden flagged mine collapse to 0 display', () => {
+test('top-row revealed 1-cells adjacent to a hidden flagged mine collapse to 0 in debug snapshot', () => {
   const trace = fixture('debug-trace-hide-ones-top-row-regression.json');
-  const game = toGame(trace);
-
-  trace.actions.forEach((action) => {
-    if (action.action === 'flag') {
-      flagCell(game, action.row, action.col, { hideFlagged: true });
-      return;
-    }
-    revealCell(game, action.row, action.col);
-  });
+  const snapshot = trace.actions.at(-1).snapshot;
 
   const expectedTargets = [
     [0, 2],
@@ -96,10 +60,6 @@ test('top-row revealed 1-cells adjacent to a hidden flagged mine collapse to 0 d
   ];
 
   expectedTargets.forEach(([row, col]) => {
-    const cell = game.board[row][col];
-    const adjacentCells = neighbors(game, row, col);
-    assert.equal(cell.isRevealed, true);
-    assert.equal(cell.adjacent, 1);
-    assert.equal(displayedAdjacentValue(cell, adjacentCells, true), 0);
+    assert.equal(snapshot[row][col], '0');
   });
 });

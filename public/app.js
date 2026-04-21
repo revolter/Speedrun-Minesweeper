@@ -7,7 +7,7 @@ const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.21.10';
+const APP_VERSION = '2026.04.21.11';
 
 const prefs = {
   hideFlagged: true,
@@ -25,7 +25,7 @@ const els = {
 };
 
 let game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
-let debugTrace = createDebugTrace(game);
+let debugTrace = createDebugTrace(game, { hideFlagged: prefs.hideFlagged });
 let pressTimer = null;
 let longPressTriggered = false;
 let copyButtonResetTimer = null;
@@ -137,7 +137,7 @@ function handleAction(row, col, actionType) {
 
   const after = captureCellState(row, col);
   if (hasCellStateChanged(before, after)) {
-    recordDebugAction(debugTrace, actionType, row, col);
+    recordDebugAction(debugTrace, actionType, game, { hideFlagged: prefs.hideFlagged });
   }
 
   render();
@@ -253,7 +253,7 @@ function render() {
 
 function resetGame() {
   game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
-  debugTrace = createDebugTrace(game);
+  debugTrace = createDebugTrace(game, { hideFlagged: prefs.hideFlagged });
   hiddenFlagAnimationsPlayed.clear();
   render();
 }

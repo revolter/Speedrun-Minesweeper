@@ -1,5 +1,5 @@
 {
-  "format": "speedrun-minesweeper-debug-v1",
+  "format": "speedrun-minesweeper-debug-v2",
   "rows": 2,
   "cols": 2,
   "mineCount": 1,
@@ -8,15 +8,37 @@
     "col": 1
   },
   "initialBoard": [
-    ["M", 1],
-    [1, 1]
+    "M1",
+    "11"
   ],
-  "initialRevealedCells": [
-    [1, 1]
+  "initialSnapshot": [
+    "..",
+    ".1"
   ],
   "actions": [
-    { "index": 1, "action": "reveal", "row": 0, "col": 1 },
-    { "index": 2, "action": "reveal", "row": 1, "col": 0 },
-    { "index": 3, "action": "flag", "row": 0, "col": 0 }
+    {
+      "index": 1,
+      "action": "reveal",
+      "snapshot": [
+        ".1",
+        ".1"
+      ]
+    },
+    {
+      "index": 2,
+      "action": "reveal",
+      "snapshot": [
+        ".1",
+        "11"
+      ]
+    },
+    {
+      "index": 3,
+      "action": "flag",
+      "snapshot": [
+        "F0",
+        "00"
+      ]
+    }
   ]
 }
