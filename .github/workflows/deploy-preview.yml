@@ -24,6 +24,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.base.ref }}
           path: main
+      - name: Initialize site with production content
+        run: |
+          mkdir -p site
+          cp -R main/public/. site/
       - name: Checkout preview content (PR head)
         uses: actions/checkout@v4
         with:
@@ -31,8 +35,6 @@ jobs:
           path: preview
       - name: Build combined Pages artifact (prod + preview path)
         run: |
-          mkdir -p site
-          cp -R main/public/. site/
           mkdir -p site/preview/pr-${{ github.event.pull_request.number }}
           cp -R preview/public/. site/preview/pr-${{ github.event.pull_request.number }}/
       - uses: actions/configure-pages@v5
