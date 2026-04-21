@@ -17,7 +17,7 @@ A touch-friendly PWA minesweeper variant designed for mobile browsers (including
 Serve the `public` directory with any static server:
 
 ```bash
-cd /home/runner/work/Speedrun-Minesweeper/Speedrun-Minesweeper/public
+cd public
 python3 -m http.server 4173
 ```
 
@@ -26,7 +26,6 @@ Then open `http://localhost:4173`.
 ## Testing
 
 ```bash
-cd /home/runner/work/Speedrun-Minesweeper/Speedrun-Minesweeper
 npm test
 ```
 
