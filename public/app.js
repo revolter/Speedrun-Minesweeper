@@ -7,7 +7,7 @@ const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.21.8';
+const APP_VERSION = '2026.04.21.9';
 
 const prefs = {
   hideFlagged: true,
@@ -29,6 +29,11 @@ let debugTrace = createDebugTrace(game);
 let pressTimer = null;
 let longPressTriggered = false;
 let copyButtonResetTimer = null;
+const hiddenFlagAnimationsPlayed = new Set();
+
+function cellKey(row, col) {
+  return `${row},${col}`;
+}
 
 function loadPreferences() {
   try {
@@ -202,6 +207,15 @@ function render() {
       }
       if (cell.isHidden) {
         button.classList.add('hidden');
+        if (cell.isFlagged) {
+          const key = cellKey(r, c);
+          if (!hiddenFlagAnimationsPlayed.has(key)) {
+            button.classList.add('hidden-flag-enter');
+            hiddenFlagAnimationsPlayed.add(key);
+          }
+        }
+      } else {
+        hiddenFlagAnimationsPlayed.delete(cellKey(r, c));
       }
 
       button.addEventListener('mousedown', (event) => {
@@ -240,6 +254,7 @@ function render() {
 function resetGame() {
   game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
   debugTrace = createDebugTrace(game);
+  hiddenFlagAnimationsPlayed.clear();
   render();
 }
 
@@ -270,7 +285,16 @@ function registerServiceWorker() {
 
 els.hideFlagged.addEventListener('change', () => {
   prefs.hideFlagged = els.hideFlagged.checked;
+  for (let r = 0; r < game.rows; r += 1) {
+    for (let c = 0; c < game.cols; c += 1) {
+      const cell = game.board[r][c];
+      if (cell.isFlagged) {
+        cell.isHidden = prefs.hideFlagged;
+      }
+    }
+  }
   savePreferences();
+  render();
 });
 
 els.swapPressActions.addEventListener('change', () => {

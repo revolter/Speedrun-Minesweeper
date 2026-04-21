@@ -100,6 +100,7 @@ label {
 .cell {
   aspect-ratio: 1;
   min-width: 0;
+  position: relative;
   border: 1px solid #c4cce5;
   border-radius: 8px;
   background: #dfe6ff;
@@ -123,4 +124,22 @@ label {
 .cell.hidden {
   background: #ffffff;
   border-color: #d0d7ef;
+}
+
+.cell.hidden.hidden-flag-enter::after {
+  content: '🚩';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  animation: hidden-flag-fade-out 220ms ease-out forwards;
+}
+
+@keyframes hidden-flag-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
