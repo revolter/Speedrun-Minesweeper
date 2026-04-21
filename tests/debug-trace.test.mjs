@@ -54,9 +54,23 @@ test('debug trace records chronological actions', () => {
 test('fixture traces are valid and available to tests', () => {
   const basic = fixture('debug-trace-basic.json');
   const edgeWin = fixture('debug-trace-edge-win.json');
+  const hiddenNumberRegression = fixture('debug-trace-hidden-number-regression.json');
+  const localDeductionRegression = fixture('debug-trace-local-deduction-regression.json');
 
   assert.equal(isDebugTrace(basic), true);
   assert.equal(isDebugTrace(edgeWin), true);
+  assert.equal(isDebugTrace(hiddenNumberRegression), true);
+  assert.equal(isDebugTrace(localDeductionRegression), true);
   assert.equal(basic.actions.length > 0, true);
   assert.equal(edgeWin.actions.at(-1).action, 'flag');
+  assert.deepEqual(hiddenNumberRegression.actions, [
+    { index: 1, action: 'flag', row: 0, col: 4 },
+    { index: 2, action: 'flag', row: 2, col: 3 }
+  ]);
+  assert.deepEqual(localDeductionRegression.actions.at(-1), {
+    index: 5,
+    action: 'flag',
+    row: 2,
+    col: 1
+  });
 });
