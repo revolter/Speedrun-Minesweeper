@@ -56,12 +56,14 @@ test('fixture traces are valid and available to tests', () => {
   const edgeWin = fixture('debug-trace-edge-win.json');
   const hiddenNumberRegression = fixture('debug-trace-hidden-number-regression.json');
   const hideOnesAfterFlagRegression = fixture('debug-trace-hide-ones-after-flag-regression.json');
+  const hideOnesTopRowRegression = fixture('debug-trace-hide-ones-top-row-regression.json');
   const localDeductionRegression = fixture('debug-trace-local-deduction-regression.json');
 
   assert.equal(isDebugTrace(basic), true);
   assert.equal(isDebugTrace(edgeWin), true);
   assert.equal(isDebugTrace(hiddenNumberRegression), true);
   assert.equal(isDebugTrace(hideOnesAfterFlagRegression), true);
+  assert.equal(isDebugTrace(hideOnesTopRowRegression), true);
   assert.equal(isDebugTrace(localDeductionRegression), true);
   assert.equal(basic.actions.length > 0, true);
   assert.equal(edgeWin.actions.at(-1).action, 'flag');
@@ -76,4 +78,10 @@ test('fixture traces are valid and available to tests', () => {
     col: 1
   });
   assert.deepEqual(hideOnesAfterFlagRegression.actions, [{ index: 1, action: 'flag', row: 3, col: 6 }]);
+  assert.deepEqual(hideOnesTopRowRegression.actions.at(-1), {
+    index: 2,
+    action: 'flag',
+    row: 0,
+    col: 3
+  });
 });

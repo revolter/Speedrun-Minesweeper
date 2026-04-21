@@ -74,3 +74,32 @@ test('revealed 1-cells adjacent to a hidden flagged mine collapse to 0 display',
   assert.ok(oneCellsNextToFlag.length > 0);
   oneCellsNextToFlag.forEach(([, , displayed]) => assert.equal(displayed, 0));
 });
+
+test('top-row revealed 1-cells adjacent to a hidden flagged mine collapse to 0 display', () => {
+  const trace = fixture('debug-trace-hide-ones-top-row-regression.json');
+  const game = toGame(trace);
+
+  trace.actions.forEach((action) => {
+    if (action.action === 'flag') {
+      flagCell(game, action.row, action.col, { hideFlagged: true });
+      return;
+    }
+    revealCell(game, action.row, action.col);
+  });
+
+  const expectedTargets = [
+    [0, 2],
+    [1, 2],
+    [1, 3],
+    [1, 4],
+    [0, 4]
+  ];
+
+  expectedTargets.forEach(([row, col]) => {
+    const cell = game.board[row][col];
+    const adjacentCells = neighbors(game, row, col);
+    assert.equal(cell.isRevealed, true);
+    assert.equal(cell.adjacent, 1);
+    assert.equal(displayedAdjacentValue(cell, adjacentCells, true), 0);
+  });
+});
