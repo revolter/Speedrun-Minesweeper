@@ -5,13 +5,15 @@ A touch-friendly PWA minesweeper variant designed for mobile browsers (including
 ## Gameplay changes
 
 - Flagging a cell is **permanent**.
+- Flagging a non-mine cell ends the game immediately.
 - When a cell is flagged, nearby safe cells are automatically revealed.
+- Auto-reveal keeps propagating to all currently deducible safe cells.
 - Each new game auto-expands a safe empty area at startup.
 
 ## Preferences
 
-- **Hide flagged cells**: renders flagged cells like empty number-less cells after auto-reveal.
-- **Swap short/long press**: switches short press and long press actions between reveal and flag.
+- **Hide flagged cells** (enabled by default): renders flagged cells like empty number-less cells after auto-reveal, and adjusts nearby displayed numbers accordingly.
+- **Swap short/long press** (enabled by default): switches short press and long press actions between reveal and flag.
 
 ## Local run
 

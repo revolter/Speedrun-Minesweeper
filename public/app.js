@@ -6,8 +6,8 @@ const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 
 const prefs = {
-  hideFlagged: false,
-  swapPressActions: false
+  hideFlagged: true,
+  swapPressActions: true
 };
 
 const els = {
@@ -25,11 +25,12 @@ let longPressTriggered = false;
 function loadPreferences() {
   try {
     const saved = JSON.parse(localStorage.getItem('speedrun-minesweeper-prefs') || '{}');
-    prefs.hideFlagged = Boolean(saved.hideFlagged);
-    prefs.swapPressActions = Boolean(saved.swapPressActions);
+    prefs.hideFlagged = typeof saved.hideFlagged === 'boolean' ? saved.hideFlagged : true;
+    prefs.swapPressActions =
+      typeof saved.swapPressActions === 'boolean' ? saved.swapPressActions : true;
   } catch {
-    prefs.hideFlagged = false;
-    prefs.swapPressActions = false;
+    prefs.hideFlagged = true;
+    prefs.swapPressActions = true;
   }
 
   els.hideFlagged.checked = prefs.hideFlagged;
@@ -40,7 +41,34 @@ function savePreferences() {
   localStorage.setItem('speedrun-minesweeper-prefs', JSON.stringify(prefs));
 }
 
-function cellLabel(cell) {
+function displayedAdjacent(row, col, cell) {
+  if (!prefs.hideFlagged || !cell.isRevealed || cell.isMine) {
+    return cell.adjacent;
+  }
+
+  let adjusted = cell.adjacent;
+  const neighbors = [
+    [row - 1, col - 1],
+    [row - 1, col],
+    [row - 1, col + 1],
+    [row, col - 1],
+    [row, col + 1],
+    [row + 1, col - 1],
+    [row + 1, col],
+    [row + 1, col + 1]
+  ];
+
+  neighbors.forEach(([nr, nc]) => {
+    const neighbor = game.board[nr]?.[nc];
+    if (neighbor?.isFlagged && neighbor.isHidden) {
+      adjusted -= 1;
+    }
+  });
+
+  return Math.max(0, adjusted);
+}
+
+function cellLabel(row, col, cell) {
   if (!cell.isRevealed) {
     if (cell.isHidden) {
       return '';
@@ -55,7 +83,8 @@ function cellLabel(cell) {
     return '💣';
   }
 
-  return cell.adjacent > 0 ? String(cell.adjacent) : '';
+  const adjacent = displayedAdjacent(row, col, cell);
+  return adjacent > 0 ? String(adjacent) : '';
 }
 
 function statusLabel() {
@@ -127,7 +156,7 @@ function render() {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'cell';
-      button.textContent = cellLabel(cell);
+      button.textContent = cellLabel(r, c, cell);
       button.ariaLabel = `Cell ${r + 1},${c + 1}`;
 
       if (cell.isRevealed) {

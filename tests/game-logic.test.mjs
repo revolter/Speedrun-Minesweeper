@@ -13,6 +13,50 @@ function createDeterministicGame() {
   return createGame(3, 3, 2, rng);
 }
 
+function createManualGame(rows, cols, mineCells) {
+  const mineSet = new Set(mineCells.map(([r, c]) => `${r},${c}`));
+  const board = Array.from({ length: rows }, (_, r) =>
+    Array.from({ length: cols }, (_, c) => ({
+      isMine: mineSet.has(`${r},${c}`),
+      isRevealed: false,
+      isFlagged: false,
+      isHidden: false,
+      adjacent: 0
+    }))
+  );
+
+  for (let r = 0; r < rows; r += 1) {
+    for (let c = 0; c < cols; c += 1) {
+      if (board[r][c].isMine) {
+        continue;
+      }
+      let adjacent = 0;
+      for (let dr = -1; dr <= 1; dr += 1) {
+        for (let dc = -1; dc <= 1; dc += 1) {
+          if (dr === 0 && dc === 0) {
+            continue;
+          }
+          const nr = r + dr;
+          const nc = c + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc].isMine) {
+            adjacent += 1;
+          }
+        }
+      }
+      board[r][c].adjacent = adjacent;
+    }
+  }
+
+  return {
+    rows,
+    cols,
+    mineCount: mineCells.length,
+    board,
+    gameOver: false,
+    won: false
+  };
+}
+
 test('flagging is irreversible and cannot be toggled', () => {
   const game = createDeterministicGame();
 
@@ -54,4 +98,23 @@ test('hide preference applies when flagging', () => {
 
   revealCell(game, 2, 2);
   assert.equal(game.board[2][2].isRevealed, false);
+});
+
+test('flagging an incorrect cell immediately loses the game', () => {
+  const game = createManualGame(3, 3, [[0, 0]]);
+
+  flagCell(game, 2, 2);
+
+  assert.equal(game.board[2][2].isFlagged, true);
+  assert.equal(game.gameOver, true);
+  assert.equal(game.won, false);
+});
+
+test('flagging reveals all currently deducible safe cells', () => {
+  const game = createManualGame(3, 3, [[0, 0]]);
+
+  flagCell(game, 0, 0);
+
+  assert.equal(game.won, true);
+  assert.equal(game.board[2][2].isRevealed, true);
 });
