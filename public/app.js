@@ -5,6 +5,7 @@ const BOARD_ROWS = 9;
 const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
+const COPY_FEEDBACK_DURATION_MS = 1200;
 const APP_VERSION = '2026.04.21.1';
 
 const prefs = {
@@ -268,7 +269,7 @@ async function copyDebugTrace() {
   copyButtonResetTimer = setTimeout(() => {
     els.copyDebug.textContent = 'Copy debug trace';
     copyButtonResetTimer = null;
-  }, 1200);
+  }, COPY_FEEDBACK_DURATION_MS);
 }
 
 function registerServiceWorker() {
