@@ -8,11 +8,11 @@ function boardSnapshot(game) {
   return game.board.map((row) => row.map(boardCellChar).join(''));
 }
 
-function normalizeSnapshot(snapshot) {
-  if (!Array.isArray(snapshot)) {
+function cloneSnapshotRows(snapshotRows) {
+  if (!Array.isArray(snapshotRows)) {
     return [];
   }
-  return snapshot.map((row) => String(row));
+  return snapshotRows.slice();
 }
 
 export function createDebugTrace(game, options = {}) {
@@ -25,18 +25,18 @@ export function createDebugTrace(game, options = {}) {
     mineCount: game.mineCount,
     initialRevealCell: game.initialRevealCell,
     initialBoard: boardSnapshot(game),
-    initialSnapshot: normalizeSnapshot(options.initialSnapshot),
+    initialSnapshot: cloneSnapshotRows(options.initialSnapshot),
     actions: []
   };
 }
 
-export function recordDebugAction(trace, action, row, col, snapshot) {
+export function recordDebugAction(trace, action, row, col, snapshotRows) {
   trace.actions.push({
     index: trace.actions.length + 1,
     action,
     row,
     col,
-    snapshot: normalizeSnapshot(snapshot)
+    snapshot: cloneSnapshotRows(snapshotRows)
   });
 }
 

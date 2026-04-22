@@ -7,7 +7,7 @@ const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.22.2';
+const APP_VERSION = '2026.04.22.3';
 
 const prefs = {
   hideFlagged: true,
@@ -66,6 +66,49 @@ function displayedAdjacent(row, col, cell) {
     game.board[row + 1]?.[col + 1]
   ];
   return displayedAdjacentValue(cell, neighbors, prefs.hideFlagged);
+}
+
+function displayedAdjacentForSnapshot(row, col, cell, hideFlaggedView) {
+  const neighbors = [
+    game.board[row - 1]?.[col - 1],
+    game.board[row - 1]?.[col],
+    game.board[row - 1]?.[col + 1],
+    game.board[row]?.[col - 1],
+    game.board[row]?.[col + 1],
+    game.board[row + 1]?.[col - 1],
+    game.board[row + 1]?.[col],
+    game.board[row + 1]?.[col + 1]
+  ];
+  return displayedAdjacentValue(cell, neighbors, hideFlaggedView);
+}
+
+function snapshotChar(row, col, hideFlaggedView, showHiddenFlagAsFlag = false) {
+  const cell = game.board[row][col];
+  if (!cell.isRevealed) {
+    if (!cell.isFlagged) {
+      return '?';
+    }
+    if (showHiddenFlagAsFlag || !hideFlaggedView) {
+      return 'F';
+    }
+    return '0';
+  }
+  if (cell.isMine) {
+    return 'M';
+  }
+  return String(displayedAdjacentForSnapshot(row, col, cell, hideFlaggedView));
+}
+
+function captureVisibleSnapshot(hideFlaggedView, showHiddenFlagAsFlag = false) {
+  const rows = [];
+  for (let r = 0; r < game.rows; r += 1) {
+    let rowText = '';
+    for (let c = 0; c < game.cols; c += 1) {
+      rowText += snapshotChar(r, c, hideFlaggedView, showHiddenFlagAsFlag);
+    }
+    rows.push(rowText);
+  }
+  return rows;
 }
 
 function cellLabel(row, col, cell) {
@@ -137,38 +180,10 @@ function setHiddenStateForFlaggedCells(hidden) {
   }
 }
 
-function captureVisibleSnapshotFromDom() {
-  const rows = [];
-  const cells = Array.from(els.board.children);
-  for (let r = 0; r < game.rows; r += 1) {
-    let rowText = '';
-    for (let c = 0; c < game.cols; c += 1) {
-      const button = cells[r * game.cols + c];
-      const text = button.textContent.trim();
-
-      if (button.classList.contains('flagged')) {
-        rowText += 'F';
-      } else if (button.classList.contains('hidden')) {
-        rowText += '0';
-      } else if (!button.classList.contains('revealed')) {
-        rowText += '?';
-      } else if (text === '') {
-        rowText += '0';
-      } else if (text === '💣') {
-        rowText += 'M';
-      } else {
-        rowText += text;
-      }
-    }
-    rows.push(rowText);
-  }
-  return rows;
-}
-
 function initializeDebugTrace() {
   debugTrace = createDebugTrace(game, {
     hideFlagged: prefs.hideFlagged,
-    initialSnapshot: captureVisibleSnapshotFromDom()
+    initialSnapshot: captureVisibleSnapshot(prefs.hideFlagged)
   });
 }
 
@@ -188,21 +203,13 @@ function handleAction(row, col, actionType) {
   }
 
   if (actionType === 'flag' && prefs.hideFlagged) {
-    const originalHidePreference = prefs.hideFlagged;
-
-    prefs.hideFlagged = false;
-    setHiddenStateForFlaggedCells(false);
-    render();
-    recordDebugAction(debugTrace, actionType, row, col, captureVisibleSnapshotFromDom());
-
-    prefs.hideFlagged = originalHidePreference;
-    setHiddenStateForFlaggedCells(true);
-    render();
-    recordDebugAction(debugTrace, 'hide-flag', row, col, captureVisibleSnapshotFromDom());
+    recordDebugAction(debugTrace, actionType, row, col, captureVisibleSnapshot(false, true));
+    recordDebugAction(debugTrace, 'hide-flag', row, col, captureVisibleSnapshot(true));
   } else {
-    render();
-    recordDebugAction(debugTrace, actionType, row, col, captureVisibleSnapshotFromDom());
+    recordDebugAction(debugTrace, actionType, row, col, captureVisibleSnapshot(prefs.hideFlagged));
   }
+
+  render();
 }
 
 function actionForPress(kind) {
