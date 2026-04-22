@@ -48,7 +48,8 @@ h1 {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 

@@ -1,17 +1,16 @@
 import { createGame, revealCell, flagCell } from './game-logic.js';
 import { createDebugTrace, recordDebugAction, serializeDebugTrace } from './debug-trace.js';
 import { displayedAdjacentValue } from './adjacent-display.js';
+import { DEFAULT_BOARD_SIZE_KEY, boardSizeConfigForKey } from './board-size.js';
 
-const BOARD_ROWS = 9;
-const BOARD_COLS = 9;
-const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.22.3';
+const APP_VERSION = '2026.04.22.4';
 
 const prefs = {
   hideFlagged: true,
-  swapPressActions: true
+  swapPressActions: true,
+  boardSize: DEFAULT_BOARD_SIZE_KEY
 };
 
 const els = {
@@ -19,12 +18,18 @@ const els = {
   status: document.querySelector('#status'),
   hideFlagged: document.querySelector('#hideFlagged'),
   swapPressActions: document.querySelector('#swapPressActions'),
+  boardSize: document.querySelector('#boardSize'),
   newGame: document.querySelector('#newGame'),
   copyDebug: document.querySelector('#copyDebug'),
   version: document.querySelector('#version')
 };
 
-let game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
+function currentBoardConfig() {
+  return boardSizeConfigForKey(prefs.boardSize);
+}
+
+const initialBoardConfig = currentBoardConfig();
+let game = createGame(initialBoardConfig.rows, initialBoardConfig.cols, initialBoardConfig.mines);
 let debugTrace = null;
 let pressTimer = null;
 let longPressTriggered = false;
@@ -41,13 +46,16 @@ function loadPreferences() {
     prefs.hideFlagged = typeof saved.hideFlagged === 'boolean' ? saved.hideFlagged : true;
     prefs.swapPressActions =
       typeof saved.swapPressActions === 'boolean' ? saved.swapPressActions : true;
+    prefs.boardSize = boardSizeConfigForKey(saved.boardSize).key;
   } catch {
     prefs.hideFlagged = true;
     prefs.swapPressActions = true;
+    prefs.boardSize = DEFAULT_BOARD_SIZE_KEY;
   }
 
   els.hideFlagged.checked = prefs.hideFlagged;
   els.swapPressActions.checked = prefs.swapPressActions;
+  els.boardSize.value = prefs.boardSize;
 }
 
 function savePreferences() {
@@ -333,7 +341,8 @@ function render() {
 }
 
 function resetGame() {
-  game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
+  const boardConfig = currentBoardConfig();
+  game = createGame(boardConfig.rows, boardConfig.cols, boardConfig.mines);
   hiddenFlagAnimationsPlayed.clear();
   render();
   initializeDebugTrace();
@@ -375,6 +384,12 @@ els.hideFlagged.addEventListener('change', () => {
 els.swapPressActions.addEventListener('change', () => {
   prefs.swapPressActions = els.swapPressActions.checked;
   savePreferences();
+});
+
+els.boardSize.addEventListener('change', () => {
+  prefs.boardSize = boardSizeConfigForKey(els.boardSize.value).key;
+  savePreferences();
+  resetGame();
 });
 
 els.newGame.addEventListener('click', resetGame);

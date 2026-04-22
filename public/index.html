@@ -24,6 +24,14 @@
           <label>
             <input id="swapPressActions" type="checkbox" /> Swap short/long press
           </label>
+          <label>
+            Board size
+            <select id="boardSize">
+              <option value="small">Small (9×9)</option>
+              <option value="medium">Medium (12×12)</option>
+              <option value="large">Large (16×16)</option>
+            </select>
+          </label>
         </div>
         <p id="status" aria-live="polite"></p>
         <div id="board" class="board" role="grid" aria-label="Minesweeper board"></div>
