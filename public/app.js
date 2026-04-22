@@ -7,7 +7,7 @@ const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.22.1';
+const APP_VERSION = '2026.04.22.2';
 
 const prefs = {
   hideFlagged: true,
@@ -25,7 +25,7 @@ const els = {
 };
 
 let game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
-let debugTrace = createDebugTrace(game, { hideFlagged: prefs.hideFlagged });
+let debugTrace = null;
 let pressTimer = null;
 let longPressTriggered = false;
 let copyButtonResetTimer = null;
@@ -126,6 +126,52 @@ function hasCellStateChanged(before, after) {
   );
 }
 
+function setHiddenStateForFlaggedCells(hidden) {
+  for (let r = 0; r < game.rows; r += 1) {
+    for (let c = 0; c < game.cols; c += 1) {
+      const cell = game.board[r][c];
+      if (cell.isFlagged) {
+        cell.isHidden = hidden;
+      }
+    }
+  }
+}
+
+function captureVisibleSnapshotFromDom() {
+  const rows = [];
+  const cells = Array.from(els.board.children);
+  for (let r = 0; r < game.rows; r += 1) {
+    let rowText = '';
+    for (let c = 0; c < game.cols; c += 1) {
+      const button = cells[r * game.cols + c];
+      const text = button.textContent.trim();
+
+      if (button.classList.contains('flagged')) {
+        rowText += 'F';
+      } else if (button.classList.contains('hidden')) {
+        rowText += '0';
+      } else if (!button.classList.contains('revealed')) {
+        rowText += '?';
+      } else if (text === '') {
+        rowText += '0';
+      } else if (text === '💣') {
+        rowText += 'M';
+      } else {
+        rowText += text;
+      }
+    }
+    rows.push(rowText);
+  }
+  return rows;
+}
+
+function initializeDebugTrace() {
+  debugTrace = createDebugTrace(game, {
+    hideFlagged: prefs.hideFlagged,
+    initialSnapshot: captureVisibleSnapshotFromDom()
+  });
+}
+
 function handleAction(row, col, actionType) {
   const before = captureCellState(row, col);
 
@@ -136,23 +182,27 @@ function handleAction(row, col, actionType) {
   }
 
   const after = captureCellState(row, col);
-  if (hasCellStateChanged(before, after)) {
-    if (actionType === 'flag') {
-      recordDebugAction(debugTrace, actionType, row, col, game, {
-        hideFlagged: prefs.hideFlagged,
-        showFlags: true
-      });
-      if (prefs.hideFlagged) {
-        recordDebugAction(debugTrace, 'hide-flag', row, col, game, {
-          hideFlagged: prefs.hideFlagged
-        });
-      }
-    } else {
-      recordDebugAction(debugTrace, actionType, row, col, game, { hideFlagged: prefs.hideFlagged });
-    }
+  if (!hasCellStateChanged(before, after)) {
+    render();
+    return;
   }
 
-  render();
+  if (actionType === 'flag' && prefs.hideFlagged) {
+    const originalHidePreference = prefs.hideFlagged;
+
+    prefs.hideFlagged = false;
+    setHiddenStateForFlaggedCells(false);
+    render();
+    recordDebugAction(debugTrace, actionType, row, col, captureVisibleSnapshotFromDom());
+
+    prefs.hideFlagged = originalHidePreference;
+    setHiddenStateForFlaggedCells(true);
+    render();
+    recordDebugAction(debugTrace, 'hide-flag', row, col, captureVisibleSnapshotFromDom());
+  } else {
+    render();
+    recordDebugAction(debugTrace, actionType, row, col, captureVisibleSnapshotFromDom());
+  }
 }
 
 function actionForPress(kind) {
@@ -265,9 +315,9 @@ function render() {
 
 function resetGame() {
   game = createGame(BOARD_ROWS, BOARD_COLS, BOARD_MINES);
-  debugTrace = createDebugTrace(game, { hideFlagged: prefs.hideFlagged });
   hiddenFlagAnimationsPlayed.clear();
   render();
+  initializeDebugTrace();
 }
 
 async function copyDebugTrace() {
@@ -298,14 +348,7 @@ function registerServiceWorker() {
 els.hideFlagged.addEventListener('change', () => {
   prefs.hideFlagged = els.hideFlagged.checked;
   debugTrace.hideFlaggedCells = prefs.hideFlagged;
-  for (let r = 0; r < game.rows; r += 1) {
-    for (let c = 0; c < game.cols; c += 1) {
-      const cell = game.board[r][c];
-      if (cell.isFlagged) {
-        cell.isHidden = prefs.hideFlagged;
-      }
-    }
-  }
+  setHiddenStateForFlaggedCells(prefs.hideFlagged);
   savePreferences();
   render();
 });
@@ -320,4 +363,5 @@ els.copyDebug.addEventListener('click', copyDebugTrace);
 
 loadPreferences();
 render();
+initializeDebugTrace();
 registerServiceWorker();

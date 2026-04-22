@@ -1,5 +1,3 @@
-import { displayedAdjacentValue } from './adjacent-display.js';
-
 export const DEBUG_TRACE_FORMAT = 'speedrun-minesweeper-debug-v3';
 
 function boardCellChar(cell) {
@@ -10,45 +8,11 @@ function boardSnapshot(game) {
   return game.board.map((row) => row.map(boardCellChar).join(''));
 }
 
-function visibleSnapshot(game, options = {}) {
-  const hideFlagged = options.hideFlagged ?? true;
-  const showFlags = options.showFlags ?? false;
-  const rows = [];
-  for (let row = 0; row < game.rows; row += 1) {
-    let text = '';
-    for (let col = 0; col < game.cols; col += 1) {
-      const cell = game.board[row][col];
-      if (cell.isFlagged) {
-        if (showFlags || !hideFlagged) {
-          text += 'F';
-        } else {
-          text += '0';
-        }
-        continue;
-      }
-      if (!cell.isRevealed) {
-        text += '?';
-        continue;
-      }
-      if (cell.isMine) {
-        text += 'M';
-        continue;
-      }
-      const neighbors = [
-        game.board[row - 1]?.[col - 1],
-        game.board[row - 1]?.[col],
-        game.board[row - 1]?.[col + 1],
-        game.board[row]?.[col - 1],
-        game.board[row]?.[col + 1],
-        game.board[row + 1]?.[col - 1],
-        game.board[row + 1]?.[col],
-        game.board[row + 1]?.[col + 1]
-      ];
-      text += String(displayedAdjacentValue(cell, neighbors, hideFlagged));
-    }
-    rows.push(text);
+function normalizeSnapshot(snapshot) {
+  if (!Array.isArray(snapshot)) {
+    return [];
   }
-  return rows;
+  return snapshot.map((row) => String(row));
 }
 
 export function createDebugTrace(game, options = {}) {
@@ -61,20 +25,18 @@ export function createDebugTrace(game, options = {}) {
     mineCount: game.mineCount,
     initialRevealCell: game.initialRevealCell,
     initialBoard: boardSnapshot(game),
-    initialSnapshot: visibleSnapshot(game, { hideFlagged }),
+    initialSnapshot: normalizeSnapshot(options.initialSnapshot),
     actions: []
   };
 }
 
-export function recordDebugAction(trace, action, row, col, game, options = {}) {
-  const hideFlagged = options.hideFlagged ?? true;
-  const showFlags = options.showFlags ?? false;
+export function recordDebugAction(trace, action, row, col, snapshot) {
   trace.actions.push({
     index: trace.actions.length + 1,
     action,
     row,
     col,
-    snapshot: visibleSnapshot(game, { hideFlagged, showFlags })
+    snapshot: normalizeSnapshot(snapshot)
   });
 }
 

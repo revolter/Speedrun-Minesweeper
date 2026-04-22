@@ -28,7 +28,10 @@ function cyclingRng(size) {
 
 test('debug trace captures initial board snapshot and reveal metadata', () => {
   const game = createGame(5, 5, 4, cyclingRng(25));
-  const trace = createDebugTrace(game);
+  const trace = createDebugTrace(game, {
+    hideFlagged: true,
+    initialSnapshot: ['?????', '?????', '?????', '?????', '?????']
+  });
 
   assert.equal(trace.rows, 5);
   assert.equal(trace.cols, 5);
@@ -36,15 +39,16 @@ test('debug trace captures initial board snapshot and reveal metadata', () => {
   assert.ok(Array.isArray(trace.initialSnapshot));
   assert.equal(typeof trace.hideFlaggedCells, 'boolean');
   assert.ok(trace.initialRevealCell);
-  assert.ok(trace.initialSnapshot.some((row) => row.includes('0')));
+  assert.equal(trace.initialSnapshot.length, 5);
+  assert.equal(trace.initialSnapshot.every((row) => typeof row === 'string'), true);
 });
 
 test('debug trace records chronological actions', () => {
   const game = createGame(3, 3, 1, cyclingRng(9));
-  const trace = createDebugTrace(game);
+  const trace = createDebugTrace(game, { initialSnapshot: ['???', '???', '???'] });
 
-  recordDebugAction(trace, 'flag', 0, 0, game);
-  recordDebugAction(trace, 'reveal', 1, 1, game);
+  recordDebugAction(trace, 'flag', 0, 0, ['F??', '???', '???']);
+  recordDebugAction(trace, 'reveal', 1, 1, ['F??', '?1?', '???']);
 
   assert.equal(trace.actions.length, 2);
   assert.equal(trace.actions[0].index, 1);
