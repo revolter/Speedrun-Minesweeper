@@ -7,7 +7,7 @@ const BOARD_COLS = 9;
 const BOARD_MINES = 10;
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.21.13';
+const APP_VERSION = '2026.04.22.1';
 
 const prefs = {
   hideFlagged: true,
@@ -137,7 +137,19 @@ function handleAction(row, col, actionType) {
 
   const after = captureCellState(row, col);
   if (hasCellStateChanged(before, after)) {
-    recordDebugAction(debugTrace, actionType, row, col, game, { hideFlagged: prefs.hideFlagged });
+    if (actionType === 'flag') {
+      recordDebugAction(debugTrace, actionType, row, col, game, {
+        hideFlagged: prefs.hideFlagged,
+        showFlags: true
+      });
+      if (prefs.hideFlagged) {
+        recordDebugAction(debugTrace, 'hide-flag', row, col, game, {
+          hideFlagged: prefs.hideFlagged
+        });
+      }
+    } else {
+      recordDebugAction(debugTrace, actionType, row, col, game, { hideFlagged: prefs.hideFlagged });
+    }
   }
 
   render();
@@ -285,6 +297,7 @@ function registerServiceWorker() {
 
 els.hideFlagged.addEventListener('change', () => {
   prefs.hideFlagged = els.hideFlagged.checked;
+  debugTrace.hideFlaggedCells = prefs.hideFlagged;
   for (let r = 0; r < game.rows; r += 1) {
     for (let c = 0; c < game.cols; c += 1) {
       const cell = game.board[r][c];

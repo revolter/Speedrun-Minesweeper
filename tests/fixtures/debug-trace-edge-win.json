@@ -1,5 +1,5 @@
 {
-  "format": "speedrun-minesweeper-debug-v2",
+  "format": "speedrun-minesweeper-debug-v3",
   "rows": 2,
   "cols": 2,
   "mineCount": 1,
@@ -45,6 +45,17 @@
         "F0",
         "00"
       ]
+    },
+    {
+      "index": 4,
+      "action": "hide-flag",
+      "row": 0,
+      "col": 0,
+      "snapshot": [
+        "00",
+        "00"
+      ]
     }
-  ]
+  ],
+  "hideFlaggedCells": true
 }

@@ -34,6 +34,7 @@ test('debug trace captures initial board snapshot and reveal metadata', () => {
   assert.equal(trace.cols, 5);
   assert.ok(Array.isArray(trace.initialBoard));
   assert.ok(Array.isArray(trace.initialSnapshot));
+  assert.equal(typeof trace.hideFlaggedCells, 'boolean');
   assert.ok(trace.initialRevealCell);
   assert.ok(trace.initialSnapshot.some((row) => row.includes('0')));
 });
@@ -69,10 +70,14 @@ test('fixture traces are valid and available to tests', () => {
   assert.equal(isDebugTrace(hideOnesTopRowRegression), true);
   assert.equal(isDebugTrace(localDeductionRegression), true);
   assert.equal(basic.actions.length > 0, true);
-  assert.equal(edgeWin.actions.at(-1).action, 'flag');
   assert.equal(hiddenNumberRegression.actions[0].action, 'flag');
-  assert.equal(localDeductionRegression.actions.at(-1).action, 'flag');
   assert.equal(hideOnesAfterFlagRegression.actions[0].action, 'flag');
-  assert.equal(hideOnesTopRowRegression.actions.at(-1).action, 'flag');
+  assert.equal(hideOnesTopRowRegression.actions.some((action) => action.action === 'flag'), true);
+  assert.equal(edgeWin.actions.some((action) => action.action === 'flag'), true);
+  assert.equal(localDeductionRegression.actions.some((action) => action.action === 'flag'), true);
+  if (basic.hideFlaggedCells) {
+    const flagIndex = basic.actions.findIndex((action) => action.action === 'flag');
+    assert.equal(basic.actions[flagIndex + 1].action, 'hide-flag');
+  }
   assert.ok(Array.isArray(hideOnesTopRowRegression.actions.at(-1).snapshot));
 });
