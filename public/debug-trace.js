@@ -12,7 +12,7 @@ function cloneSnapshotRows(snapshotRows) {
   if (!Array.isArray(snapshotRows)) {
     return [];
   }
-  return snapshotRows.slice();
+  return snapshotRows.map((row) => String(row));
 }
 
 export function createDebugTrace(game, options = {}) {

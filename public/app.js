@@ -68,7 +68,7 @@ function displayedAdjacent(row, col, cell) {
   return displayedAdjacentValue(cell, neighbors, prefs.hideFlagged);
 }
 
-function displayedAdjacentForSnapshot(row, col, cell, hideFlaggedView) {
+function displayedAdjacentForSnapshot(row, col, cell, hideFlagged) {
   const neighbors = [
     game.board[row - 1]?.[col - 1],
     game.board[row - 1]?.[col],
@@ -79,16 +79,16 @@ function displayedAdjacentForSnapshot(row, col, cell, hideFlaggedView) {
     game.board[row + 1]?.[col],
     game.board[row + 1]?.[col + 1]
   ];
-  return displayedAdjacentValue(cell, neighbors, hideFlaggedView);
+  return displayedAdjacentValue(cell, neighbors, hideFlagged);
 }
 
-function snapshotChar(row, col, hideFlaggedView, showHiddenFlagAsFlag = false) {
+function snapshotChar(row, col, hideFlagged, showHiddenFlagAsFlag = false) {
   const cell = game.board[row][col];
   if (!cell.isRevealed) {
     if (!cell.isFlagged) {
       return '?';
     }
-    if (showHiddenFlagAsFlag || !hideFlaggedView) {
+    if (showHiddenFlagAsFlag || !hideFlagged) {
       return 'F';
     }
     return '0';
@@ -96,15 +96,15 @@ function snapshotChar(row, col, hideFlaggedView, showHiddenFlagAsFlag = false) {
   if (cell.isMine) {
     return 'M';
   }
-  return String(displayedAdjacentForSnapshot(row, col, cell, hideFlaggedView));
+  return String(displayedAdjacentForSnapshot(row, col, cell, hideFlagged));
 }
 
-function captureVisibleSnapshot(hideFlaggedView, showHiddenFlagAsFlag = false) {
+function captureVisibleSnapshot({ hideFlagged, showHiddenFlagAsFlag = false }) {
   const rows = [];
   for (let r = 0; r < game.rows; r += 1) {
     let rowText = '';
     for (let c = 0; c < game.cols; c += 1) {
-      rowText += snapshotChar(r, c, hideFlaggedView, showHiddenFlagAsFlag);
+      rowText += snapshotChar(r, c, hideFlagged, showHiddenFlagAsFlag);
     }
     rows.push(rowText);
   }
@@ -183,7 +183,7 @@ function setHiddenStateForFlaggedCells(hidden) {
 function initializeDebugTrace() {
   debugTrace = createDebugTrace(game, {
     hideFlagged: prefs.hideFlagged,
-    initialSnapshot: captureVisibleSnapshot(prefs.hideFlagged)
+    initialSnapshot: captureVisibleSnapshot({ hideFlagged: prefs.hideFlagged })
   });
 }
 
@@ -203,10 +203,22 @@ function handleAction(row, col, actionType) {
   }
 
   if (actionType === 'flag' && prefs.hideFlagged) {
-    recordDebugAction(debugTrace, actionType, row, col, captureVisibleSnapshot(false, true));
-    recordDebugAction(debugTrace, 'hide-flag', row, col, captureVisibleSnapshot(true));
+    recordDebugAction(
+      debugTrace,
+      actionType,
+      row,
+      col,
+      captureVisibleSnapshot({ hideFlagged: false, showHiddenFlagAsFlag: true })
+    );
+    recordDebugAction(debugTrace, 'hide-flag', row, col, captureVisibleSnapshot({ hideFlagged: true }));
   } else {
-    recordDebugAction(debugTrace, actionType, row, col, captureVisibleSnapshot(prefs.hideFlagged));
+    recordDebugAction(
+      debugTrace,
+      actionType,
+      row,
+      col,
+      captureVisibleSnapshot({ hideFlagged: prefs.hideFlagged })
+    );
   }
 
   render();
