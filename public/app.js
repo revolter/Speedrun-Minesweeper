@@ -2,15 +2,21 @@ import { createGame, revealCell, flagCell } from './game-logic.js';
 import { createDebugTrace, recordDebugAction, serializeDebugTrace } from './debug-trace.js';
 import { displayedAdjacentValue } from './adjacent-display.js';
 import { DEFAULT_BOARD_SIZE_KEY, boardSizeConfigForKey } from './board-size.js';
+import {
+  DEFAULT_DIFFICULTY_KEY,
+  difficultyConfigForKey,
+  mineCountForDifficulty
+} from './difficulty.js';
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.22.4';
+const APP_VERSION = '2026.04.22.5';
 
 const prefs = {
   hideFlagged: true,
   swapPressActions: true,
-  boardSize: DEFAULT_BOARD_SIZE_KEY
+  boardSize: DEFAULT_BOARD_SIZE_KEY,
+  difficulty: DEFAULT_DIFFICULTY_KEY
 };
 
 const els = {
@@ -19,13 +25,16 @@ const els = {
   hideFlagged: document.querySelector('#hideFlagged'),
   swapPressActions: document.querySelector('#swapPressActions'),
   boardSize: document.querySelector('#boardSize'),
+  difficulty: document.querySelector('#difficulty'),
   newGame: document.querySelector('#newGame'),
   copyDebug: document.querySelector('#copyDebug'),
   version: document.querySelector('#version')
 };
 
 function currentBoardConfig() {
-  return boardSizeConfigForKey(prefs.boardSize);
+  const board = boardSizeConfigForKey(prefs.boardSize);
+  const mines = mineCountForDifficulty(board.mines, board.rows * board.cols, prefs.difficulty);
+  return { ...board, mines };
 }
 
 const initialBoardConfig = currentBoardConfig();
@@ -47,15 +56,18 @@ function loadPreferences() {
     prefs.swapPressActions =
       typeof saved.swapPressActions === 'boolean' ? saved.swapPressActions : true;
     prefs.boardSize = boardSizeConfigForKey(saved.boardSize).key;
+    prefs.difficulty = difficultyConfigForKey(saved.difficulty).key;
   } catch {
     prefs.hideFlagged = true;
     prefs.swapPressActions = true;
     prefs.boardSize = DEFAULT_BOARD_SIZE_KEY;
+    prefs.difficulty = DEFAULT_DIFFICULTY_KEY;
   }
 
   els.hideFlagged.checked = prefs.hideFlagged;
   els.swapPressActions.checked = prefs.swapPressActions;
   els.boardSize.value = prefs.boardSize;
+  els.difficulty.value = prefs.difficulty;
 }
 
 function savePreferences() {
@@ -388,6 +400,12 @@ els.swapPressActions.addEventListener('change', () => {
 
 els.boardSize.addEventListener('change', () => {
   prefs.boardSize = boardSizeConfigForKey(els.boardSize.value).key;
+  savePreferences();
+  resetGame();
+});
+
+els.difficulty.addEventListener('change', () => {
+  prefs.difficulty = difficultyConfigForKey(els.difficulty.value).key;
   savePreferences();
   resetGame();
 });
