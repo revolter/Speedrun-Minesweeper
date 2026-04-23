@@ -10,7 +10,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.23.3';
+const APP_VERSION = '2026.04.23.4';
 
 const prefs = {
   hideFlagged: true,
@@ -37,8 +37,7 @@ function currentBoardConfig() {
   return { ...board, mines };
 }
 
-const initialBoardConfig = currentBoardConfig();
-let game = createGame(initialBoardConfig.rows, initialBoardConfig.cols, initialBoardConfig.mines);
+let game;
 let debugTrace = null;
 let pressTimer = null;
 let longPressTriggered = false;
@@ -432,6 +431,5 @@ els.newGame.addEventListener('click', resetGame);
 els.copyDebug.addEventListener('click', copyDebugTrace);
 
 loadPreferences();
-render();
-initializeDebugTrace();
+resetGame();
 registerServiceWorker();
