@@ -1,8 +1,9 @@
 import { createGame, revealCell, flagCell } from './game-logic.js';
 import { createDebugTrace, recordDebugAction, serializeDebugTrace } from './debug-trace.js';
 import { displayedAdjacentValue } from './adjacent-display.js';
-import { DEFAULT_BOARD_SIZE_KEY, boardSizeConfigForKey } from './board-size.js';
+import { BOARD_SIZE_OPTIONS, DEFAULT_BOARD_SIZE_KEY, boardSizeConfigForKey } from './board-size.js';
 import {
+  DIFFICULTY_OPTIONS,
   DEFAULT_DIFFICULTY_KEY,
   difficultyConfigForKey,
   mineCountForDifficulty
@@ -10,7 +11,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.23.5';
+const APP_VERSION = '2026.04.23.6';
 
 const prefs = {
   hideFlagged: true,
@@ -30,6 +31,20 @@ const els = {
   copyDebug: document.querySelector('#copyDebug'),
   version: document.querySelector('#version')
 };
+
+for (const option of BOARD_SIZE_OPTIONS) {
+  const el = document.createElement('option');
+  el.value = option.key;
+  el.textContent = option.label;
+  els.boardSize.appendChild(el);
+}
+
+for (const option of DIFFICULTY_OPTIONS) {
+  const el = document.createElement('option');
+  el.value = option.key;
+  el.textContent = option.label;
+  els.difficulty.appendChild(el);
+}
 
 function currentBoardConfig() {
   const board = boardSizeConfigForKey(prefs.boardSize);
