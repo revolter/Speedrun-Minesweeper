@@ -60,6 +60,7 @@ function buildGame(rows, cols, mines, rng) {
     cols,
     mineCount: mines,
     initialRevealCell: null,
+    explodedCell: null,
     board,
     gameOver: false,
     won: false
@@ -194,6 +195,16 @@ function updateWinState(game) {
   }
 }
 
+function revealAllCells(game) {
+  for (let r = 0; r < game.rows; r += 1) {
+    for (let c = 0; c < game.cols; c += 1) {
+      const cell = game.board[r][c];
+      cell.isRevealed = true;
+      cell.isHidden = false;
+    }
+  }
+}
+
 export function revealCell(game, row, col) {
   if (game.gameOver || game.won) {
     return;
@@ -205,8 +216,10 @@ export function revealCell(game, row, col) {
   }
 
   if (cell.isMine) {
-    cell.isRevealed = true;
+    game.explodedCell = { row, col, reason: 'mine' };
+    revealAllCells(game);
     game.gameOver = true;
+    game.won = false;
     return;
   }
 
@@ -234,6 +247,8 @@ export function flagCell(game, row, col, options = {}) {
     cell.isHidden = true;
   }
   if (!cell.isMine) {
+    game.explodedCell = { row, col, reason: 'wrong-flag' };
+    revealAllCells(game);
     game.gameOver = true;
     game.won = false;
     return;

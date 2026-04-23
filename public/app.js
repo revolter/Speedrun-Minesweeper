@@ -11,7 +11,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.23.7';
+const APP_VERSION = '2026.04.23.8';
 
 const prefs = {
   hideFlagged: true,
