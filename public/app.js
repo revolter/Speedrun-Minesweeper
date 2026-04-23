@@ -10,7 +10,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.23.4';
+const APP_VERSION = '2026.04.23.5';
 
 const prefs = {
   hideFlagged: true,
@@ -113,7 +113,7 @@ function hiddenCellDisplayValue(row, col) {
     game.board[row + 1]?.[col + 1]
   ];
   const adjacentMines = neighbors.filter((n) => n?.isMine).length;
-  const hiddenFlaggedNeighbors = neighbors.filter((n) => n?.isFlagged).length;
+  const hiddenFlaggedNeighbors = neighbors.filter((n) => n?.isFlagged && n?.isMine).length;
   return Math.max(0, adjacentMines - hiddenFlaggedNeighbors);
 }
 

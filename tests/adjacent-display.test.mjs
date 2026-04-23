@@ -22,16 +22,21 @@ test('does not subtract flagged neighbors when hide preference is off', () => {
   assert.equal(value, 3);
 });
 
-test('subtracts flagged neighbors from revealed number cells when hide preference is on', () => {
+test('subtracts flagged mine neighbors from revealed number cells when hide preference is on', () => {
   const value = displayedAdjacentValue(cell(3), [
-    cell(0, { isFlagged: true, isHidden: true }),
-    cell(0, { isFlagged: true, isHidden: false }),
+    cell(0, { isMine: true, isFlagged: true, isHidden: true }),
+    cell(0, { isMine: true, isFlagged: true, isHidden: false }),
     null
   ], true);
   assert.equal(value, 1);
 });
 
-test('shows 0 when flagged neighbors satisfy a revealed number cell', () => {
-  const value = displayedAdjacentValue(cell(1), [cell(0, { isFlagged: true, isHidden: true })], true);
+test('shows 0 when flagged mine neighbors satisfy a revealed number cell', () => {
+  const value = displayedAdjacentValue(cell(1), [cell(0, { isMine: true, isFlagged: true, isHidden: true })], true);
   assert.equal(value, 0);
+});
+
+test('does not subtract non-mine flagged neighbors from adjacent count', () => {
+  const value = displayedAdjacentValue(cell(1), [cell(0, { isMine: false, isFlagged: true, isHidden: true })], true);
+  assert.equal(value, 1);
 });

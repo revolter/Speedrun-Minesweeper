@@ -67,6 +67,7 @@ test('fixture traces are valid and available to tests', () => {
   const hideOnesTopRowRegression = fixture('debug-trace-hide-ones-top-row-regression.json');
   const localDeductionRegression = fixture('debug-trace-local-deduction-regression.json');
   const hiddenMineAdjacentRegression = fixture('debug-trace-hidden-mine-adjacent-regression.json');
+  const wrongFlagNumberRegression = fixture('debug-trace-wrong-flag-number-regression.json');
 
   assert.equal(isDebugTrace(basic), true);
   assert.equal(isDebugTrace(edgeWin), true);
@@ -75,6 +76,7 @@ test('fixture traces are valid and available to tests', () => {
   assert.equal(isDebugTrace(hideOnesTopRowRegression), true);
   assert.equal(isDebugTrace(localDeductionRegression), true);
   assert.equal(isDebugTrace(hiddenMineAdjacentRegression), true);
+  assert.equal(isDebugTrace(wrongFlagNumberRegression), true);
   assert.equal(basic.actions.length > 0, true);
   assert.equal(hiddenNumberRegression.actions[0].action, 'flag');
   assert.equal(hideOnesAfterFlagRegression.actions[0].action, 'flag');
@@ -96,4 +98,15 @@ test('hidden mine with adjacent unrevealed mine shows its adjacent count in hide
   assert.equal(hideFlagAction.row, 0);
   assert.equal(hideFlagAction.col, 4);
   assert.equal(hideFlagAction.snapshot[0][4], '1');
+});
+
+test('flagging a non-mine cell does not decrement adjacent revealed numbers', () => {
+  const trace = fixture('debug-trace-wrong-flag-number-regression.json');
+  const hideFlagAction = trace.actions.find((action) => action.action === 'hide-flag');
+
+  assert.ok(hideFlagAction);
+  assert.equal(hideFlagAction.row, 2);
+  assert.equal(hideFlagAction.col, 4);
+  assert.equal(hideFlagAction.snapshot[3][3], '1');
+  assert.equal(hideFlagAction.snapshot[3][4], '2');
 });
