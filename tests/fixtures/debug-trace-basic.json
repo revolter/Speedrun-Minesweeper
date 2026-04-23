@@ -1,0 +1,57 @@
+{
+  "format": "speedrun-minesweeper-debug-v3",
+  "appVersion": "2026.04.23.1",
+  "rows": 3,
+  "cols": 3,
+  "mineCount": 1,
+  "initialRevealCell": {
+    "row": 2,
+    "col": 0
+  },
+  "initialBoard": [
+    "M10",
+    "110",
+    "000"
+  ],
+  "initialSnapshot": [
+    "??0",
+    "??0",
+    "000"
+  ],
+  "actions": [
+    {
+      "index": 1,
+      "action": "flag",
+      "row": 0,
+      "col": 0,
+      "snapshot": [
+        "F00",
+        "000",
+        "000"
+      ]
+    },
+    {
+      "index": 2,
+      "action": "hide-flag",
+      "row": 0,
+      "col": 0,
+      "snapshot": [
+        "000",
+        "000",
+        "000"
+      ]
+    },
+    {
+      "index": 3,
+      "action": "reveal",
+      "row": 1,
+      "col": 1,
+      "snapshot": [
+        "000",
+        "000",
+        "000"
+      ]
+    }
+  ],
+  "hideFlaggedCells": true
+}

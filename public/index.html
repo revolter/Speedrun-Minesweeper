@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Speedrun Minesweeper</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/icon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="card">
+        <h1>Speedrun Minesweeper</h1>
+        <div class="controls">
+          <button id="newGame" type="button">New game</button>
+          <button id="copyDebug" type="button">Copy debug trace</button>
+          <label>
+            <input id="hideFlagged" type="checkbox" /> Hide flagged cells
+          </label>
+          <label>
+            <input id="swapPressActions" type="checkbox" /> Swap short/long press
+          </label>
+          <label>
+            Board size
+            <select id="boardSize">
+            </select>
+          </label>
+          <label>
+            Difficulty
+            <select id="difficulty">
+            </select>
+          </label>
+        </div>
+        <p id="status" aria-live="polite"></p>
+        <div id="board" class="board" role="grid" aria-label="Minesweeper board"></div>
+        <p id="version" class="version"></p>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
