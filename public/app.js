@@ -11,7 +11,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.23.6';
+const APP_VERSION = '2026.04.23.7';
 
 const prefs = {
   hideFlagged: true,
@@ -239,6 +239,41 @@ function initializeDebugTrace() {
   });
 }
 
+function revealHiddenFlagZeroCells() {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let r = 0; r < game.rows; r += 1) {
+      for (let c = 0; c < game.cols; c += 1) {
+        const cell = game.board[r][c];
+        if (!cell.isRevealed || cell.isMine) {
+          continue;
+        }
+        if (displayedAdjacent(r, c, cell) !== 0) {
+          continue;
+        }
+        for (let dr = -1; dr <= 1; dr += 1) {
+          for (let dc = -1; dc <= 1; dc += 1) {
+            if (dr === 0 && dc === 0) {
+              continue;
+            }
+            const nr = r + dr;
+            const nc = c + dc;
+            if (nr < 0 || nr >= game.rows || nc < 0 || nc >= game.cols) {
+              continue;
+            }
+            const neighbor = game.board[nr][nc];
+            if (!neighbor.isRevealed && !neighbor.isFlagged) {
+              revealCell(game, nr, nc);
+              changed = true;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 function handleAction(row, col, actionType) {
   const before = captureCellState(row, col);
 
@@ -262,6 +297,7 @@ function handleAction(row, col, actionType) {
       col,
       captureVisibleSnapshot({ hideFlagged: false, showHiddenFlagAsFlag: true })
     );
+    revealHiddenFlagZeroCells();
     recordDebugAction(debugTrace, 'hide-flag', row, col, captureVisibleSnapshot({ hideFlagged: true }));
   } else {
     recordDebugAction(
