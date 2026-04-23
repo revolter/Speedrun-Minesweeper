@@ -10,7 +10,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.23.2';
+const APP_VERSION = '2026.04.23.3';
 
 const prefs = {
   hideFlagged: true,
@@ -102,6 +102,22 @@ function displayedAdjacentForSnapshot(row, col, cell, hideFlagged) {
   return displayedAdjacentValue(cell, neighbors, hideFlagged);
 }
 
+function hiddenCellDisplayValue(row, col) {
+  const neighbors = [
+    game.board[row - 1]?.[col - 1],
+    game.board[row - 1]?.[col],
+    game.board[row - 1]?.[col + 1],
+    game.board[row]?.[col - 1],
+    game.board[row]?.[col + 1],
+    game.board[row + 1]?.[col - 1],
+    game.board[row + 1]?.[col],
+    game.board[row + 1]?.[col + 1]
+  ];
+  const adjacentMines = neighbors.filter((n) => n?.isMine).length;
+  const hiddenFlaggedNeighbors = neighbors.filter((n) => n?.isFlagged).length;
+  return Math.max(0, adjacentMines - hiddenFlaggedNeighbors);
+}
+
 function snapshotChar(row, col, hideFlagged, showHiddenFlagAsFlag = false) {
   const cell = game.board[row][col];
   if (!cell.isRevealed) {
@@ -111,7 +127,7 @@ function snapshotChar(row, col, hideFlagged, showHiddenFlagAsFlag = false) {
     if (showHiddenFlagAsFlag || !hideFlagged) {
       return 'F';
     }
-    return '0';
+    return String(hiddenCellDisplayValue(row, col));
   }
   if (cell.isMine) {
     return 'M';
@@ -134,7 +150,8 @@ function captureVisibleSnapshot({ hideFlagged, showHiddenFlagAsFlag = false }) {
 function cellLabel(row, col, cell) {
   if (!cell.isRevealed) {
     if (cell.isHidden) {
-      return '';
+      const value = hiddenCellDisplayValue(row, col);
+      return value > 0 ? String(value) : '';
     }
     if (cell.isFlagged) {
       return '🚩';
