@@ -49,7 +49,7 @@ export function isDebugTrace(value) {
   return (
     value &&
     value.format === DEBUG_TRACE_FORMAT &&
-    (value.appVersion === null || typeof value.appVersion === 'string') &&
+    typeof value.appVersion === 'string' &&
     typeof value.hideFlaggedCells === 'boolean' &&
     Number.isInteger(value.rows) &&
     Number.isInteger(value.cols) &&
