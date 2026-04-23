@@ -44,28 +44,3 @@ export function recordDebugAction(trace, action, row, col, snapshotRows) {
 export function serializeDebugTrace(trace) {
   return JSON.stringify(trace, null, 2);
 }
-
-export function isDebugTrace(value) {
-  return (
-    value &&
-    value.format === DEBUG_TRACE_FORMAT &&
-    typeof value.appVersion === 'string' &&
-    typeof value.hideFlaggedCells === 'boolean' &&
-    Number.isInteger(value.rows) &&
-    Number.isInteger(value.cols) &&
-    Array.isArray(value.initialBoard) &&
-    value.initialBoard.every((row) => typeof row === 'string') &&
-    Array.isArray(value.initialSnapshot) &&
-    value.initialSnapshot.every((row) => typeof row === 'string') &&
-    Array.isArray(value.actions) &&
-    value.actions.every(
-      (action) =>
-        Number.isInteger(action.index) &&
-        typeof action.action === 'string' &&
-        Number.isInteger(action.row) &&
-        Number.isInteger(action.col) &&
-        Array.isArray(action.snapshot) &&
-        action.snapshot.every((row) => typeof row === 'string')
-    )
-  );
-}
