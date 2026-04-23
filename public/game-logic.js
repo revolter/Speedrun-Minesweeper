@@ -219,7 +219,6 @@ export function revealCell(game, row, col) {
     game.explodedCell = { row, col, reason: 'mine' };
     revealAllCells(game);
     game.gameOver = true;
-    game.won = false;
     return;
   }
 
@@ -250,7 +249,6 @@ export function flagCell(game, row, col, options = {}) {
     game.explodedCell = { row, col, reason: 'wrong-flag' };
     revealAllCells(game);
     game.gameOver = true;
-    game.won = false;
     return;
   }
 
