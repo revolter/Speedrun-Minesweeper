@@ -10,7 +10,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.22.5';
+const APP_VERSION = '2026.04.23.1';
 
 const prefs = {
   hideFlagged: true,
@@ -202,6 +202,7 @@ function setHiddenStateForFlaggedCells(hidden) {
 
 function initializeDebugTrace() {
   debugTrace = createDebugTrace(game, {
+    appVersion: APP_VERSION,
     hideFlagged: prefs.hideFlagged,
     initialSnapshot: captureVisibleSnapshot({ hideFlagged: prefs.hideFlagged })
   });

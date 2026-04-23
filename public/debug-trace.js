@@ -19,6 +19,7 @@ export function createDebugTrace(game, options = {}) {
   const hideFlagged = options.hideFlagged ?? true;
   return {
     format: DEBUG_TRACE_FORMAT,
+    appVersion: options.appVersion ?? null,
     hideFlaggedCells: hideFlagged,
     rows: game.rows,
     cols: game.cols,
@@ -48,6 +49,7 @@ export function isDebugTrace(value) {
   return (
     value &&
     value.format === DEBUG_TRACE_FORMAT &&
+    (value.appVersion === null || typeof value.appVersion === 'string') &&
     typeof value.hideFlaggedCells === 'boolean' &&
     Number.isInteger(value.rows) &&
     Number.isInteger(value.cols) &&

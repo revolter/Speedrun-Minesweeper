@@ -1,5 +1,6 @@
 {
   "format": "speedrun-minesweeper-debug-v3",
+  "appVersion": null,
   "rows": 3,
   "cols": 3,
   "mineCount": 1,
