@@ -125,20 +125,22 @@ test('revealing a mine loses the game and reveals the entire board', () => {
 });
 
 test('losing reveals hidden flagged cells', () => {
+  // 3x3: mines at (0,0) and (1,2). After flagging (0,0) with hideFlagged,
+  // (0,1) has adj=2 so deduction cannot trigger, leaving (0,2) unrevealed.
   const game = createManualGame(3, 3, [
     [0, 0],
-    [2, 2]
+    [1, 2]
   ]);
   flagCell(game, 0, 0, { hideFlagged: true });
   assert.equal(game.board[0][0].isHidden, true);
 
-  flagCell(game, 2, 0, { hideFlagged: true });
+  flagCell(game, 0, 2, { hideFlagged: true });
 
   assert.equal(game.gameOver, true);
   assert.equal(game.board[0][0].isHidden, false);
 });
 
-test('flagging only reveals safe cells adjacent to the newly flagged mine', () => {
+test('flagging reveals safe cells adjacent to the mine and cascades further deductions', () => {
   const game = createManualGame(3, 3, [[0, 0]]);
 
   flagCell(game, 0, 0);
@@ -146,8 +148,8 @@ test('flagging only reveals safe cells adjacent to the newly flagged mine', () =
   assert.equal(game.board[0][1].isRevealed, true);
   assert.equal(game.board[1][0].isRevealed, true);
   assert.equal(game.board[1][1].isRevealed, true);
-  assert.equal(game.board[2][2].isRevealed, false);
-  assert.equal(game.won, false);
+  assert.equal(game.board[2][2].isRevealed, true);
+  assert.equal(game.won, true);
 });
 
 test('game is won when all mines are flagged and all safe cells are revealed', () => {
