@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, revealCell, flagCell } from '../public/game-logic.js';
+import { createGame, isBoardSolvable, revealCell, flagCell } from '../public/game-logic.js';
 
 function createDeterministicGame() {
   const picks = [0, 8];
@@ -172,4 +172,56 @@ test('flagging triggers local numbered-cell deduction reveals', () => {
   flagCell(game, 1, 0);
 
   assert.equal(game.board[2][2].isRevealed, true);
+});
+
+test('isBoardSolvable returns true for a trivially solvable board', () => {
+  // 3x3, mine at (2,2). Zero region top-left floods to reveal all safe cells.
+  // (1,2) has adj=1 with only (2,2) unknown -> deduced mine, flags it,
+  // which auto-reveals its safe neighbors (already revealed).
+  const game = createManualGame(3, 3, [[2, 2]]);
+  game.board[0][0].isRevealed = true;
+  game.board[0][1].isRevealed = true;
+  game.board[0][2].isRevealed = true;
+  game.board[1][0].isRevealed = true;
+  game.board[1][1].isRevealed = true;
+  game.board[1][2].isRevealed = true;
+  game.board[2][0].isRevealed = true;
+  game.board[2][1].isRevealed = true;
+
+  assert.equal(isBoardSolvable(game), true);
+});
+
+test('isBoardSolvable returns false when a mine cannot be deduced', () => {
+  // 3x3, mines at (0,0) and (2,2).
+  // Only (0,1) is revealed with adj=1 and two unknown neighbors -> ambiguous.
+  const game = createManualGame(3, 3, [[0, 0], [2, 2]]);
+  game.board[0][1].isRevealed = true;
+
+  assert.equal(isBoardSolvable(game), false);
+});
+
+test('isBoardSolvable returns true when auto-reveal-on-flag cascades to complete the board', () => {
+  // 2x3, mine at (0,0). (0,1) is revealed (adj=1) with only (0,0) unknown -> flag it.
+  // Flagging (0,0) auto-reveals all its safe neighbors -> completes the board.
+  const game = createManualGame(2, 3, [[0, 0]]);
+  game.board[0][1].isRevealed = true;
+  game.board[0][2].isRevealed = true;
+  game.board[1][0].isRevealed = true;
+  game.board[1][1].isRevealed = true;
+  game.board[1][2].isRevealed = true;
+
+  assert.equal(isBoardSolvable(game), true);
+});
+
+test('createGame always produces a solvable board', () => {
+  const seeds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  for (const seed of seeds) {
+    let state = seed;
+    const rng = () => {
+      state = (state * 1664525 + 1013904223) & 0xffffffff;
+      return (state >>> 0) / 0x100000000;
+    };
+    const game = createGame(9, 9, 10, rng);
+    assert.equal(isBoardSolvable(game), true, `board with seed ${seed} should be solvable`);
+  }
 });

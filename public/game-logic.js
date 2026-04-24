@@ -1,24 +1,98 @@
-const MAX_INITIAL_REVEAL_ATTEMPTS = 200;
+const MAX_SOLVABLE_ATTEMPTS = 1000;
 const MIN_SAFE_REGION_SIZE = 2;
 
 export function createGame(rows = 9, cols = 9, mineCount = 10, rng = Math.random) {
   const total = rows * cols;
   const mines = Math.max(1, Math.min(mineCount, total - 1));
-  let game = null;
-  let revealed = false;
-  let attempts = 0;
 
-  while (!revealed && attempts < MAX_INITIAL_REVEAL_ATTEMPTS) {
-    game = buildGame(rows, cols, mines, rng);
-    revealed = revealInitialArea(game);
-    attempts += 1;
+  for (let attempts = 0; attempts < MAX_SOLVABLE_ATTEMPTS; attempts += 1) {
+    const game = buildGame(rows, cols, mines, rng);
+    if (revealInitialArea(game) && isBoardSolvable(game)) {
+      return game;
+    }
   }
 
-  if (!revealed) {
-    revealAnySafeCell(game);
+  const fallback = buildGame(rows, cols, mines, rng);
+  if (!revealInitialArea(fallback)) {
+    revealAnySafeCell(fallback);
+  }
+  return fallback;
+}
+
+export function isBoardSolvable(game) {
+  const { rows, cols, board } = game;
+  const revealed = new Set();
+  const flagged = new Set();
+
+  for (let r = 0; r < rows; r += 1) {
+    for (let c = 0; c < cols; c += 1) {
+      if (board[r][c].isRevealed) {
+        revealed.add(`${r},${c}`);
+      }
+    }
   }
 
-  return game;
+  function floodReveal(r, c) {
+    const key = `${r},${c}`;
+    if (revealed.has(key) || flagged.has(key) || board[r][c].isMine) {
+      return;
+    }
+    revealed.add(key);
+    if (board[r][c].adjacent === 0) {
+      getNeighbors(rows, cols, r, c).forEach(([nr, nc]) => {
+        floodReveal(nr, nc);
+      });
+    }
+  }
+
+  function flagMine(r, c) {
+    const key = `${r},${c}`;
+    if (flagged.has(key)) {
+      return;
+    }
+    flagged.add(key);
+    getNeighbors(rows, cols, r, c).forEach(([nr, nc]) => {
+      const nkey = `${nr},${nc}`;
+      if (!board[nr][nc].isMine && !revealed.has(nkey)) {
+        floodReveal(nr, nc);
+      }
+    });
+  }
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let r = 0; r < rows; r += 1) {
+      for (let c = 0; c < cols; c += 1) {
+        const key = `${r},${c}`;
+        if (!revealed.has(key) || board[r][c].isMine) {
+          continue;
+        }
+        const adj = board[r][c].adjacent;
+        const neighbors = getNeighbors(rows, cols, r, c);
+        const flaggedNeighbors = neighbors.filter(([nr, nc]) => flagged.has(`${nr},${nc}`));
+        const unknownNeighbors = neighbors.filter(([nr, nc]) => {
+          const nkey = `${nr},${nc}`;
+          return !revealed.has(nkey) && !flagged.has(nkey);
+        });
+        if (flaggedNeighbors.length === adj && unknownNeighbors.length > 0) {
+          unknownNeighbors.forEach(([nr, nc]) => {
+            floodReveal(nr, nc);
+            changed = true;
+          });
+        } else if (unknownNeighbors.length > 0 && flaggedNeighbors.length + unknownNeighbors.length === adj) {
+          unknownNeighbors.forEach(([nr, nc]) => {
+            flagMine(nr, nc);
+            changed = true;
+          });
+        }
+      }
+    }
+  }
+
+  return board.every((row, r) =>
+    row.every((cell, c) => cell.isMine || revealed.has(`${r},${c}`))
+  );
 }
 
 function buildGame(rows, cols, mines, rng) {
