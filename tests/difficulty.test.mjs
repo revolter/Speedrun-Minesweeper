@@ -24,7 +24,7 @@ test('mine count scales by difficulty and stays within valid bounds', () => {
   assert.equal(mineCountForDifficulty(10, 81, 'easy'), 8);
   assert.equal(mineCountForDifficulty(10, 81, 'normal'), 10);
   assert.equal(mineCountForDifficulty(10, 81, 'hard'), 14);
-  assert.equal(mineCountForDifficulty(10, 81, 'hardest'), 18);
+  assert.equal(mineCountForDifficulty(10, 81, 'hardest'), 20);
   assert.equal(mineCountForDifficulty(1, 4, 'easy'), 1);
   assert.equal(mineCountForDifficulty(10, 4, 'hard'), 3);
 });
