@@ -11,7 +11,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.23.7';
+const APP_VERSION = '2026.04.23.9';
 
 const prefs = {
   hideFlagged: true,
@@ -162,6 +162,15 @@ function captureVisibleSnapshot({ hideFlagged, showHiddenFlagAsFlag = false }) {
 }
 
 function cellLabel(row, col, cell) {
+  if (
+    game.gameOver &&
+    !game.won &&
+    game.explodedCell?.row === row &&
+    game.explodedCell?.col === col
+  ) {
+    return game.explodedCell.reason === 'mine' ? '💥' : '❌';
+  }
+
   if (!cell.isRevealed) {
     if (cell.isHidden) {
       const value = hiddenCellDisplayValue(row, col);

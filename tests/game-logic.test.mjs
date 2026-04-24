@@ -51,6 +51,7 @@ function createManualGame(rows, cols, mineCells) {
     rows,
     cols,
     mineCount: mineCells.length,
+    explodedCell: null,
     board,
     gameOver: false,
     won: false
@@ -108,6 +109,33 @@ test('flagging an incorrect cell immediately loses the game', () => {
   assert.equal(game.board[2][2].isFlagged, true);
   assert.equal(game.gameOver, true);
   assert.equal(game.won, false);
+  assert.deepEqual(game.explodedCell, { row: 2, col: 2, reason: 'wrong-flag' });
+  assert.equal(game.board.flat().every((cell) => cell.isRevealed), true);
+});
+
+test('revealing a mine loses the game and reveals the entire board', () => {
+  const game = createManualGame(3, 3, [[1, 1]]);
+
+  revealCell(game, 1, 1);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.won, false);
+  assert.deepEqual(game.explodedCell, { row: 1, col: 1, reason: 'mine' });
+  assert.equal(game.board.flat().every((cell) => cell.isRevealed), true);
+});
+
+test('losing reveals hidden flagged cells', () => {
+  const game = createManualGame(3, 3, [
+    [0, 0],
+    [2, 2]
+  ]);
+  flagCell(game, 0, 0, { hideFlagged: true });
+  assert.equal(game.board[0][0].isHidden, true);
+
+  flagCell(game, 2, 0, { hideFlagged: true });
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.board[0][0].isHidden, false);
 });
 
 test('flagging only reveals safe cells adjacent to the newly flagged mine', () => {
