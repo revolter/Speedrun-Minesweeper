@@ -83,6 +83,16 @@ label {
   font-size: 0.92rem;
 }
 
+#status.won {
+  color: #15803d;
+  font-weight: 700;
+}
+
+#status.game-over {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
 .version {
   margin: 0.65rem 0 0;
   font-size: 0.72rem;

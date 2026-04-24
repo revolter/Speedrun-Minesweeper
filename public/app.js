@@ -11,7 +11,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.23.9';
+const APP_VERSION = '2026.04.24.1';
 
 const prefs = {
   hideFlagged: true,
@@ -192,10 +192,10 @@ function cellLabel(row, col, cell) {
 
 function statusLabel() {
   if (game.won) {
-    return 'You won!';
+    return 'You won! 🎉';
   }
   if (game.gameOver) {
-    return 'Game over';
+    return 'Game over 💀';
   }
   return 'Speedrun mode: flagging is permanent and auto-reveals nearby safe cells.';
 }
@@ -426,6 +426,7 @@ function render() {
   }
 
   els.status.textContent = statusLabel();
+  els.status.className = game.won ? 'won' : game.gameOver ? 'game-over' : '';
   els.version.textContent = `build ${APP_VERSION}`;
 }
 
