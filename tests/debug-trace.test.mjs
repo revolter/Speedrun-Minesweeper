@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createGame } from '../public/game-logic.js';
+import { createGame, flagCell } from '../public/game-logic.js';
 import {
   createDebugTrace,
   recordDebugAction,
@@ -68,6 +68,7 @@ test('fixture traces are valid and available to tests', () => {
   const hiddenMineAdjacentRegression = fixture('debug-trace-hidden-mine-adjacent-regression.json');
   const wrongFlagNumberRegression = fixture('debug-trace-wrong-flag-number-regression.json');
   const autoRevealRegression = fixture('debug-trace-auto-reveal-regression.json');
+  const cellsNotAutoRevealingRegression = fixture('debug-trace-cells-not-auto-revealing-regression.json');
 
   assert.equal(basic.actions.length > 0, true);
   assert.equal(hiddenNumberRegression.actions[0].action, 'flag');
@@ -83,6 +84,7 @@ test('fixture traces are valid and available to tests', () => {
   assert.ok(hiddenMineAdjacentRegression);
   assert.ok(wrongFlagNumberRegression);
   assert.ok(autoRevealRegression);
+  assert.ok(cellsNotAutoRevealingRegression);
 });
 
 test('hidden mine with adjacent unrevealed mine shows its adjacent count in hide-flag snapshot', () => {
@@ -114,4 +116,36 @@ test('hide-flag auto-reveals cells adjacent to revealed cells whose display drop
   assert.equal(hideFlagAction.snapshot[0][2], '0');
   assert.equal(hideFlagAction.snapshot[0][3], '1');
   assert.equal(hideFlagAction.snapshot[1][3], '3');
+});
+
+test('flagging a mine cascades deduction to reveal indirectly-deducible safe cells', () => {
+  const trace = fixture('debug-trace-cells-not-auto-revealing-regression.json');
+
+  const board = Array.from({ length: trace.rows }, (_, r) =>
+    Array.from({ length: trace.cols }, (_, c) => ({
+      isMine: trace.initialBoard[r][c] === 'M',
+      isRevealed: trace.initialSnapshot[r][c] !== '?',
+      isFlagged: false,
+      isHidden: false,
+      adjacent: trace.initialBoard[r][c] === 'M' ? 0 : parseInt(trace.initialBoard[r][c], 10)
+    }))
+  );
+
+  const game = {
+    rows: trace.rows,
+    cols: trace.cols,
+    board,
+    mineCount: trace.mineCount,
+    gameOver: false,
+    won: false,
+    explodedCell: null
+  };
+
+  const flagAction = trace.actions[0];
+  flagCell(game, flagAction.row, flagAction.col);
+
+  // r4:c1 must be revealed: the '1' at r5:c2 has all its mines flagged (r6:c3),
+  // so its only remaining unrevealed safe neighbor (r4:c1) must be auto-revealed.
+  assert.equal(game.board[4][1].isRevealed, true);
+  assert.equal(flagAction.snapshot[4][1], String(game.board[4][1].adjacent));
 });

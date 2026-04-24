@@ -242,7 +242,7 @@ function flaggedNeighborCount(game, row, col) {
   return getNeighbors(game.rows, game.cols, row, col).filter(([nr, nc]) => game.board[nr][nc].isFlagged).length;
 }
 
-function revealDeducedSafeNeighbors(game, row, col) {
+function revealDeducedSafeNeighbors(game, row, col, deductionQueue = []) {
   const cell = game.board[row][col];
   if (!cell.isRevealed || cell.isMine || cell.adjacent <= 0) {
     return;
@@ -255,6 +255,7 @@ function revealDeducedSafeNeighbors(game, row, col) {
     const neighbor = game.board[nr][nc];
     if (!neighbor.isRevealed && !neighbor.isFlagged) {
       revealFlood(game, nr, nc);
+      deductionQueue.push([nr, nc]);
     }
   });
 }
@@ -310,7 +311,7 @@ export function flagCell(game, row, col, options = {}) {
     return;
   }
 
-  const deducedRevealCandidates = getNeighbors(game.rows, game.cols, row, col).filter(([nr, nc]) => {
+  const deductionQueue = getNeighbors(game.rows, game.cols, row, col).filter(([nr, nc]) => {
     const neighbor = game.board[nr][nc];
     return neighbor.isRevealed && !neighbor.isMine;
   });
@@ -330,12 +331,20 @@ export function flagCell(game, row, col, options = {}) {
     const neighbor = game.board[nr][nc];
     if (!neighbor.isMine && !neighbor.isRevealed && !neighbor.isFlagged) {
       neighbor.isRevealed = true;
+      deductionQueue.push([nr, nc]);
     }
   });
 
-  deducedRevealCandidates.forEach(([nr, nc]) => {
-    revealDeducedSafeNeighbors(game, nr, nc);
-  });
+  const processed = new Set();
+  while (deductionQueue.length > 0) {
+    const [nr, nc] = deductionQueue.shift();
+    const key = `${nr},${nc}`;
+    if (processed.has(key)) {
+      continue;
+    }
+    processed.add(key);
+    revealDeducedSafeNeighbors(game, nr, nc, deductionQueue);
+  }
 
   updateWinState(game);
 }
