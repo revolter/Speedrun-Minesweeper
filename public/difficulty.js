@@ -1,7 +1,8 @@
 const DIFFICULTY_OPTIONS = [
   { key: 'easy', label: 'Easy', mineMultiplier: 0.75 },
   { key: 'normal', label: 'Normal', mineMultiplier: 1 },
-  { key: 'hard', label: 'Hard', mineMultiplier: 1.35 }
+  { key: 'hard', label: 'Hard', mineMultiplier: 1.35 },
+  { key: 'hardest', label: 'Hardest', mineMultiplier: 1.75 }
 ];
 
 const DIFFICULTY_OPTIONS_BY_KEY = new Map(DIFFICULTY_OPTIONS.map((option) => [option.key, option]));
