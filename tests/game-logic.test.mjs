@@ -142,6 +142,7 @@ test('losing reveals hidden flagged cells', () => {
 
 test('flagging reveals safe cells adjacent to the mine and cascades further deductions', () => {
   const game = createManualGame(3, 3, [[0, 0]]);
+  game.board[0][1].isRevealed = true;
 
   flagCell(game, 0, 0);
 
