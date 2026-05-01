@@ -70,6 +70,7 @@ test('fixture traces are valid and available to tests', () => {
   const autoRevealRegression = fixture('debug-trace-auto-reveal-regression.json');
   const cellsNotAutoRevealingRegression = fixture('debug-trace-cells-not-auto-revealing-regression.json');
   const cellRevealingWhenNotNeededRegression = fixture('debug-trace-cell-revealing-when-not-needed-regression.json');
+  const hiddenMineZeroAdjacentRegression = fixture('debug-trace-hidden-mine-zero-adjacent-regression.json');
 
   assert.equal(basic.actions.length > 0, true);
   assert.equal(hiddenNumberRegression.actions[0].action, 'flag');
@@ -87,6 +88,7 @@ test('fixture traces are valid and available to tests', () => {
   assert.ok(autoRevealRegression);
   assert.ok(cellsNotAutoRevealingRegression);
   assert.ok(cellRevealingWhenNotNeededRegression);
+  assert.ok(hiddenMineZeroAdjacentRegression);
 });
 
 test('hidden mine with adjacent unrevealed mine shows its adjacent count in hide-flag snapshot', () => {
@@ -183,4 +185,26 @@ test('flagging a mine does not reveal cells that cannot be deduced safe via cons
   // r0:c9 must NOT be revealed: the '4' at r0:c8 still has one unflagged mine (r1:c9)
   // after this flag action, so its unknown neighbor r0:c9 cannot be deduced safe.
   assert.equal(game.board[0][9].isRevealed, false);
+});
+
+test('hidden mine with zero adjacent mines shows 0 in hide-flag snapshot and does not over-reveal', () => {
+  const trace = fixture('debug-trace-hidden-mine-zero-adjacent-regression.json');
+
+  // The mine at r9:c2 has no adjacent mines; hiddenCellDisplayValue must return 0, not 1.
+  const hideFlagAction = trace.actions.find((a) => a.action === 'hide-flag');
+  assert.ok(hideFlagAction);
+  assert.equal(hideFlagAction.snapshot[9][2], '0');
+
+  // r8:c3 (adj=3) has only one flagged mine after the flag action, so it cannot be
+  // deduced safe and must remain unrevealed.
+  assert.equal(hideFlagAction.snapshot[8][3], '?');
+
+  // Confirm the flag action snapshot correctly reveals only the cells provably safe
+  // via constraint propagation: r8:c2 (via r9:c1 whose adj=1 equals its flagged count)
+  // and r9:c3 (via r10:c2 whose adj=1 equals its flagged count).
+  const flagAction = trace.actions.find((a) => a.action === 'flag');
+  assert.ok(flagAction);
+  assert.equal(flagAction.snapshot[8][2], '2');
+  assert.equal(flagAction.snapshot[9][3], '3');
+  assert.equal(flagAction.snapshot[8][3], '?');
 });
