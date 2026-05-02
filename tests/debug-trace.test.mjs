@@ -195,9 +195,9 @@ test('hidden mine with zero adjacent mines shows 0 in hide-flag snapshot and doe
   assert.ok(hideFlagAction);
   assert.equal(hideFlagAction.snapshot[9][2], '0');
 
-  // r8:c3 (adj=3) has only one flagged mine after the flag action, so it cannot be
-  // deduced safe and must remain unrevealed.
-  assert.equal(hideFlagAction.snapshot[8][3], '?');
+  // r8:c3 must now be revealed (cascade from hidden mine r9:c2 showing '0'):
+  // adj=3, one flagged mine (r9:c2) → displayedAdj=2
+  assert.equal(hideFlagAction.snapshot[8][3], '2');
 
   // Confirm the flag action snapshot correctly reveals only the cells provably safe
   // via constraint propagation: r8:c2 (via r9:c1 whose adj=1 equals its flagged count)

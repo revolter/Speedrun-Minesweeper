@@ -11,7 +11,7 @@ import {
 
 const LONG_PRESS_MS = 380;
 const COPY_FEEDBACK_DURATION_MS = 1200;
-const APP_VERSION = '2026.04.30.1';
+const APP_VERSION = '2026.05.01.1';
 
 const prefs = {
   hideFlagged: true,
@@ -255,10 +255,9 @@ function revealHiddenFlagZeroCells() {
     for (let r = 0; r < game.rows; r += 1) {
       for (let c = 0; c < game.cols; c += 1) {
         const cell = game.board[r][c];
-        if (!cell.isRevealed || cell.isMine) {
-          continue;
-        }
-        if (displayedAdjacent(r, c, cell) !== 0) {
+        const isRevealedZero = cell.isRevealed && !cell.isMine && displayedAdjacent(r, c, cell) === 0;
+        const isHiddenMineZero = cell.isMine && cell.isFlagged && cell.isHidden && hiddenCellDisplayValue(r, c) === 0;
+        if (!isRevealedZero && !isHiddenMineZero) {
           continue;
         }
         for (let dr = -1; dr <= 1; dr += 1) {
