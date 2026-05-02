@@ -327,14 +327,6 @@ export function flagCell(game, row, col, options = {}) {
     return;
   }
 
-  getNeighbors(game.rows, game.cols, row, col).forEach(([nr, nc]) => {
-    const neighbor = game.board[nr][nc];
-    if (!neighbor.isMine && !neighbor.isRevealed && !neighbor.isFlagged) {
-      neighbor.isRevealed = true;
-      deductionQueue.push([nr, nc]);
-    }
-  });
-
   const processed = new Set();
   while (deductionQueue.length > 0) {
     const [nr, nc] = deductionQueue.shift();
